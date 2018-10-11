@@ -1,0 +1,31 @@
+{
+  "name": "graphql-rate-limit",
+  "version": "0.1.0",
+  "description": "Basic rate-limiting middleware for GraphQL. Use to limit repeated requests to queries and/or mutations.",
+  "homepage": "https://github.com/ravangen/graphql-rate-limit#readme",
+  "author": "Rob Van Gennip <ravangen@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ravangen/graphql-rate-limit.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ravangen/graphql-rate-limit/issues"
+  },
+  "license": "MIT",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "graphql",
+    "graphql-js",
+    "middleware",
+    "schema",
+    "resolvers",
+    "rate",
+    "limit",
+    "ratelimit",
+    "rate-limit",
+    "cost",
+    "security"
+  ]
+}
