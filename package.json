@@ -1,7 +1,7 @@
 {
   "name": "graphql-rate-limit",
-  "version": "0.1.0",
   "description": "Basic rate-limiting middleware for GraphQL. Use to limit repeated requests to queries and/or mutations.",
+  "version": "0.1.0",
   "homepage": "https://github.com/ravangen/graphql-rate-limit#readme",
   "author": "Rob Van Gennip <ravangen@gmail.com>",
   "repository": {
@@ -12,7 +12,14 @@
     "url": "https://github.com/ravangen/graphql-rate-limit/issues"
   },
   "license": "MIT",
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
+  "typescript": {
+    "definition": "dist/index.d.ts"
+  },
   "scripts": {
+    "build": "rm -rf dist && tsc -d",
+    "prettier": "prettier --trailing-comma all --single-quote --write 'src/**/*.ts'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -27,5 +34,15 @@
     "rate-limit",
     "cost",
     "security"
-  ]
+  ],
+  "dependencies": {
+    "apollo-server": "^2.1.0",
+    "graphql": "^14.0.2",
+    "graphql-tools": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/graphql": "^14.0.2",
+    "prettier": "^1.14.3",
+    "typescript": "^3.1.3"
+  }
 }

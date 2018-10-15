@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "lib": ["es2017", "esnext.asynciterable"],
+    "target": "ES5",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "rootDir": "src",
+    "outDir": "dist"
+  },
+  "exclude": ["dist", "node_modules"]
+}
