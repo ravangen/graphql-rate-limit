@@ -21,7 +21,7 @@
     "build": "rm -rf dist && tsc -d",
     "lint": "npm run tslint; npm run prettier",
     "tslint": "tslint --fix -c tslint.json 'src/**/*.ts'",
-    "prettier": "prettier --trailing-comma all --single-quote --write 'src/**/*.ts'",
+    "prettier": "prettier --write 'src/**/*.ts'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
