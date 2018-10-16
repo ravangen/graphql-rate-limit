@@ -1,24 +1,13 @@
-import { ApolloServer, gql } from 'apollo-server';
+import { gql } from 'apollo-server';
 import {
   defaultFieldResolver,
   GraphQLField,
   GraphQLObjectType,
   GraphQLResolveInfo,
 } from 'graphql';
-import { makeExecutableSchema, SchemaDirectiveVisitor } from 'graphql-tools';
+import { SchemaDirectiveVisitor } from 'graphql-tools';
 
-const books = [
-  {
-    title: 'Harry Potter and the Chamber of Secrets',
-    author: 'J.K. Rowling',
-  },
-  {
-    title: 'Jurassic Park',
-    author: 'Michael Crichton',
-  },
-];
-
-const typeDefs = gql`
+export const rateLimitTypeDefs = gql`
   directive @rateLimit(
     max: Int = 60
     period: RateLimitPeriod = MINUTE
@@ -30,24 +19,7 @@ const typeDefs = gql`
     HOUR
     DAY
   }
-
-  type Book {
-    title: String @rateLimit(period: DAY)
-    author: String
-  }
-
-  type Query @rateLimit {
-    books: [Book]
-    greeting: String @rateLimit(max: 15)
-  }
 `;
-
-const resolvers = {
-  Query: {
-    books: () => books,
-    greeting: () => 'Hello!',
-  },
-};
 
 export type RateLimitKeyGenerator<TContext> = (
   source: any,
@@ -56,10 +28,17 @@ export type RateLimitKeyGenerator<TContext> = (
   info: GraphQLResolveInfo,
 ) => string;
 
-function createRateLimitDirective(
-  keyGenerator: RateLimitKeyGenerator<any>,
-  errorMessage,
-) {
+export interface RateLimitConfig {
+  directiveName?: string;
+  keyGenerator?: RateLimitKeyGenerator<any>;
+  onLimitReached?: Function;
+}
+
+export const createRateLimitDirective = (config: RateLimitConfig = {
+  directiveName: 'rateLimit',
+  keyGenerator: (source: any, args: any, context: any, info: GraphQLResolveInfo) => info.fieldName,
+  onLimitReached: () => {},
+}): typeof SchemaDirectiveVisitor => {
   class RateLimitDirective extends SchemaDirectiveVisitor {
     visitObject(object: GraphQLObjectType) {
       // Wrap fields for limiting that don't have their own @rateLimit
@@ -68,7 +47,7 @@ function createRateLimitDirective(
         const directives = field.astNode.directives;
         if (
           !directives ||
-          !directives.some(directive => directive.name.value === 'rateLimit')
+          !directives.some(directive => directive.name.value === config.directiveName)
         ) {
           this.limit(field);
         }
@@ -82,7 +61,7 @@ function createRateLimitDirective(
       const { resolve = defaultFieldResolver } = field;
       field.resolve = async (...args) => {
         console.log(
-          `${keyGenerator(...args)}: ${this.args.max}/${this.args.period}`,
+          `${config.keyGenerator(...args)}: ${this.args.max}/${this.args.period}`,
         );
         return resolve.apply(this, args);
       };
@@ -90,25 +69,3 @@ function createRateLimitDirective(
   }
   return RateLimitDirective;
 }
-
-const keyGenerator = (
-  source: any,
-  args: any,
-  context: any,
-  info: GraphQLResolveInfo,
-) => {
-  return info.fieldName;
-};
-
-const schema = makeExecutableSchema({
-  typeDefs,
-  resolvers,
-  schemaDirectives: {
-    rateLimit: createRateLimitDirective(keyGenerator, 'Too many requests.'),
-  },
-});
-
-const server = new ApolloServer({ schema });
-server.listen().then(({ url }) => {
-  console.log(`🚀  Server ready at ${url}`);
-});
