@@ -1,6 +1,6 @@
 import { ApolloServer, gql } from 'apollo-server';
 import { makeExecutableSchema } from 'graphql-tools';
-import { createRateLimitDirective, rateLimitTypeDefs } from './index';
+import { createRateLimitDirective, RateLimitTypeDefs } from './index';
 
 const books = [
   {
@@ -33,7 +33,7 @@ const resolvers = {
 };
 
 const schema = makeExecutableSchema({
-  typeDefs: [rateLimitTypeDefs, typeDefs],
+  typeDefs: [RateLimitTypeDefs, typeDefs],
   resolvers,
   schemaDirectives: {
     rateLimit: createRateLimitDirective(),

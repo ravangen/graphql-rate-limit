@@ -7,7 +7,7 @@ import {
 } from 'graphql';
 import { SchemaDirectiveVisitor } from 'graphql-tools';
 
-export const rateLimitTypeDefs = gql`
+export const RateLimitTypeDefs = gql`
   directive @rateLimit(
     max: Int = 60
     period: RateLimitPeriod = MINUTE
@@ -20,6 +20,36 @@ export const rateLimitTypeDefs = gql`
     DAY
   }
 `;
+
+// export const RateLimitPeriodType = new GraphQLEnumType({
+//   name: 'RateLimitPeriod',
+//   description: 'Unit of time to measure usage over',
+//   values: {
+//     // Name of the enum value will be used as its internal value.
+//     SECOND: {},
+//     MINUTE: {},
+//     HOUR: {},
+//     DAY: {},
+//   },
+// });
+//
+// export const RateLimitDirective = new GraphQLDirective({
+//   name: 'rateLimit',
+//   locations: [
+//     DirectiveLocation.OBJECT,
+//     DirectiveLocation.FIELD_DEFINITION,
+//   ],
+//   args: {
+//     max: {
+//       type: GraphQLInt,
+//       defaultValue: 60,
+//     },
+//     period: {
+//       type: RateLimitPeriodType,
+//       defaultValue: 'MINUTE',
+//     },
+//   },
+// });
 
 export type RateLimitKeyGenerator<TContext> = (
   source: any,
@@ -54,7 +84,7 @@ export interface Store {
  */
 export type StoreIncrementCallback = (error?: {}, hitCount?: number) => void;
 
-export interface RateLimitConfig {
+export interface IOptions {
   directiveName?: string;
   keyGenerator?: RateLimitKeyGenerator<any>;
   onLimitReached?: Function;
@@ -62,7 +92,7 @@ export interface RateLimitConfig {
 }
 
 export const createRateLimitDirective = (
-  config: RateLimitConfig = {
+  options: IOptions = {
     directiveName: 'rateLimit',
     keyGenerator: (
       source: any,
@@ -76,6 +106,28 @@ export const createRateLimitDirective = (
   },
 ): typeof SchemaDirectiveVisitor => {
   class RateLimitDirective extends SchemaDirectiveVisitor {
+    // static getDirectiveDeclaration(
+    //   directiveName: string = options.directiveName,
+    //   schema: GraphQLSchema,
+    // ) {
+    //   return new GraphQLDirective({
+    //     name: directiveName,
+    //     locations: [
+    //       DirectiveLocation.OBJECT,
+    //       DirectiveLocation.FIELD_DEFINITION,
+    //     ],
+    //     args: {
+    //       max: {
+    //         type: GraphQLInt,
+    //         defaultValue: 60,
+    //       },
+    //       period: {
+    //         type: schema.getType('RateLimitPeriod') as GraphQLEnumType,
+    //         defaultValue: 'MINUTE',
+    //       },
+    //     },
+    //   });
+    // }
     visitObject(object: GraphQLObjectType) {
       // Wrap fields for limiting that don't have their own @rateLimit
       const fields = object.getFields();
@@ -84,7 +136,7 @@ export const createRateLimitDirective = (
         if (
           !directives ||
           !directives.some(
-            directive => directive.name.value === config.directiveName,
+            directive => directive.name.value === options.directiveName,
           )
         ) {
           this.limit(field);
@@ -98,7 +150,7 @@ export const createRateLimitDirective = (
       // Rate limit this field
       const { resolve = defaultFieldResolver } = field;
       field.resolve = async (...args) => {
-        const key = config.keyGenerator(...args);
+        const key = options.keyGenerator(...args);
         console.log(`${key}: ${this.args.max}/${this.args.period}`);
         return resolve.apply(this, args);
       };
