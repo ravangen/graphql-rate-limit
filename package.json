@@ -20,7 +20,7 @@
   "scripts": {
     "build": "rm -rf dist && tsc -d",
     "lint": "npm run tslint; npm run prettier",
-    "tslint": "tslint --fix -c tslint.json 'src/**/*.ts'",
+    "tslint": "tslint --project tsconfig.json --fix --config tslint.json 'src/**/*.ts'",
     "prettier": "prettier --write 'src/**/*.ts'",
     "test": "jest"
   },

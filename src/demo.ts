@@ -36,11 +36,16 @@ const schema = makeExecutableSchema({
   typeDefs: [RateLimitTypeDefs, typeDefs],
   resolvers,
   schemaDirectives: {
-    rateLimit: createRateLimitDirective(),
+    rateLimit: createRateLimitDirective<any>(),
   },
 });
 
 const server = new ApolloServer({ schema });
-server.listen().then(({ url }) => {
-  console.log(`🚀  Server ready at ${url}`);
-});
+server
+  .listen()
+  .then(({ url }) => {
+    console.log(`🚀  Server ready at ${url}`);
+  })
+  .catch(error => {
+    console.error(error);
+  });

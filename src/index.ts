@@ -84,27 +84,21 @@ export interface Store {
  */
 export type StoreIncrementCallback = (error?: {}, hitCount?: number) => void;
 
-export interface IOptions {
+export interface IOptions<TContext> {
   directiveName?: string;
-  keyGenerator?: RateLimitKeyGenerator<any>;
+  keyGenerator?: RateLimitKeyGenerator<TContext>;
   onLimitReached?: Function;
   store?: Store;
 }
 
-export const createRateLimitDirective = (
-  options: IOptions = {
-    directiveName: 'rateLimit',
-    keyGenerator: (
-      source: any,
-      args: any,
-      context: any,
-      info: GraphQLResolveInfo,
-    ) => info.fieldName,
-    onLimitReached: () => {
-      /* no-op */
-    },
-  },
-): typeof SchemaDirectiveVisitor => {
+export function createRateLimitDirective<TContext>(
+  options: IOptions<TContext> = {},
+): typeof SchemaDirectiveVisitor {
+  const keyGenerator = options.keyGenerator
+    ? options.keyGenerator
+    : (source: any, args: any, context: TContext, info: GraphQLResolveInfo) =>
+        info.fieldName;
+
   class RateLimitDirective extends SchemaDirectiveVisitor {
     // static getDirectiveDeclaration(
     //   directiveName: string = options.directiveName,
@@ -132,6 +126,7 @@ export const createRateLimitDirective = (
       // Wrap fields for limiting that don't have their own @rateLimit
       const fields = object.getFields();
       Object.values(fields).forEach(field => {
+        if (!field.astNode) return;
         const directives = field.astNode.directives;
         if (
           !directives ||
@@ -150,11 +145,11 @@ export const createRateLimitDirective = (
       // Rate limit this field
       const { resolve = defaultFieldResolver } = field;
       field.resolve = async (...args) => {
-        const key = options.keyGenerator(...args);
+        const key = keyGenerator(...args);
         console.log(`${key}: ${this.args.max}/${this.args.period}`);
         return resolve.apply(this, args);
       };
     }
   }
   return RateLimitDirective;
-};
+}
