@@ -19,9 +19,11 @@
   },
   "scripts": {
     "build": "rm -rf dist && tsc -d",
-    "lint": "npm run tslint; npm run prettier",
+    "lint": "yarn run tslint; yarn run prettier",
     "tslint": "tslint --project tsconfig.json --fix --config tslint.json 'src/**/*.ts'",
+    "tslint:ci": "tslint --project tsconfig.json --config tslint.json 'src/**/*.ts'",
     "prettier": "prettier --write 'src/**/*.ts'",
+    "prettier:ci": "prettier --list-different 'src/**/*.ts'",
     "test": "jest"
   },
   "keywords": [

@@ -5,4 +5,45 @@ jobs:
       - image: circleci/node:10.10.0
     steps:
       - checkout
-      - run: echo "hello world"
+
+      - restore_cache:
+          name: Restoring Yarn package cache
+          key: yarn-packages-{{ checksum "yarn.lock" }}
+
+      - run:
+          name: Setting Yarn offline mirror
+          command: yarn config set yarn-offline-mirror ~/.cache/yarn && yarn config set yarn-offline-mirror-pruning true
+
+      - run:
+          name: Installing dependencies
+          command: yarn install --prefer-offline --frozen-lockfile
+
+      - save_cache:
+          name: Storing Yarn package cache
+          key: yarn-packages-{{ checksum "yarn.lock" }}
+          paths:
+            - ~/.cache/yarn
+
+      - run:
+          name: Checking dependency integrity
+          command: yarn check --integrity --verify-tree
+
+      - run:
+          name: Build dependencies
+          command: yarn build
+
+      - run:
+          name: Running tests
+          command: yarn run test
+
+      - run:
+          name: Running prettier
+          command: yarn run prettier:ci
+
+      - run:
+          name: Running tslint
+          command: yarn run tslint:ci
+
+      - run:
+          name: Running typechecker
+          command: yarn run tsc
