@@ -8,15 +8,43 @@ import {
 import { SchemaDirectiveVisitor } from 'graphql-tools';
 
 export const RateLimitTypeDefs = gql`
+  """
+  Controls the rate of traffic.
+  """
   directive @rateLimit(
+    """
+    Quantity that is allowed per period.
+    """
     max: Int = 60
+
+    """
+    Unit of time being observed.
+    """
     period: RateLimitPeriod = MINUTE
   ) on OBJECT | FIELD_DEFINITION
 
+  """
+  Unit of time to measure usage over
+  """
   enum RateLimitPeriod {
+    """
+    Smallest unit of measurement.
+    """
     SECOND
+
+    """
+    60 seconds.
+    """
     MINUTE
+
+    """
+    60 minutes.
+    """
     HOUR
+
+    """
+    24 hours.
+    """
     DAY
   }
 `;
@@ -99,7 +127,7 @@ export function createRateLimitDirective<TContext>(
     : (source: any, args: any, context: TContext, info: GraphQLResolveInfo) =>
         info.fieldName;
 
-  class RateLimitDirective extends SchemaDirectiveVisitor {
+  return class extends SchemaDirectiveVisitor {
     // static getDirectiveDeclaration(
     //   directiveName: string = options.directiveName,
     //   schema: GraphQLSchema,
@@ -151,5 +179,4 @@ export function createRateLimitDirective<TContext>(
       };
     }
   }
-  return RateLimitDirective;
 }

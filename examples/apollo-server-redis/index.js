@@ -1,5 +1,5 @@
 const { ApolloServer, gql } = require('apollo-server');
-// import { createRateLimitDirective, RateLimitTypeDefs } from './index';
+const { createRateLimitDirective, RateLimitTypeDefs } = require('../../dist/index');
 
 const books = [
   {
@@ -14,13 +14,13 @@ const books = [
 
 const typeDefs = gql`
   type Book {
-    title: String
+    title: String @rateLimit(period: DAY)
     author: String
   }
 
-  type Query {
+  type Query @rateLimit {
     books: [Book!]
-    quote: String
+    quote: String @rateLimit(max: 15)
   }
 `;
 
@@ -32,8 +32,11 @@ const resolvers = {
 };
 
 const server = new ApolloServer({
-  typeDefs,
+  typeDefs: [RateLimitTypeDefs, typeDefs],
   resolvers,
+  schemaDirectives: {
+    rateLimit: createRateLimitDirective(),
+  },
 });
 server.listen()
   .then(({ url }) => {
