@@ -1,13 +1,13 @@
-import { gql } from 'apollo-server';
 import {
   defaultFieldResolver,
   GraphQLField,
   GraphQLObjectType,
   GraphQLResolveInfo,
 } from 'graphql';
+import gql from 'graphql-tag';
 import { SchemaDirectiveVisitor } from 'graphql-tools';
 
-export const RateLimitTypeDefs = gql`
+export const rateLimitTypeDefs = gql`
   """
   Controls the rate of traffic.
   """
@@ -24,7 +24,7 @@ export const RateLimitTypeDefs = gql`
   ) on OBJECT | FIELD_DEFINITION
 
   """
-  Unit of time to measure usage over
+  Unit of time to measure usage over.
   """
   enum RateLimitPeriod {
     """
@@ -49,41 +49,12 @@ export const RateLimitTypeDefs = gql`
   }
 `;
 
-// export const RateLimitPeriodType = new GraphQLEnumType({
-//   name: 'RateLimitPeriod',
-//   description: 'Unit of time to measure usage over',
-//   values: {
-//     // Name of the enum value will be used as its internal value.
-//     SECOND: {},
-//     MINUTE: {},
-//     HOUR: {},
-//     DAY: {},
-//   },
-// });
-//
-// export const RateLimitDirective = new GraphQLDirective({
-//   name: 'rateLimit',
-//   locations: [
-//     DirectiveLocation.OBJECT,
-//     DirectiveLocation.FIELD_DEFINITION,
-//   ],
-//   args: {
-//     max: {
-//       type: GraphQLInt,
-//       defaultValue: 60,
-//     },
-//     period: {
-//       type: RateLimitPeriodType,
-//       defaultValue: 'MINUTE',
-//     },
-//   },
-// });
-
 export type RateLimitKeyGenerator<TContext> = (
   source: any,
   args: any,
   context: TContext,
   info: GraphQLResolveInfo,
+  directiveArgs: any,
 ) => string;
 
 // Store mirrors what express-rate-limit defines: https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/express-rate-limit
@@ -113,7 +84,6 @@ export interface Store {
 export type StoreIncrementCallback = (error?: {}, hitCount?: number) => void;
 
 export interface IOptions<TContext> {
-  directiveName?: string;
   keyGenerator?: RateLimitKeyGenerator<TContext>;
   onLimitReached?: Function;
   store?: Store;
@@ -124,32 +94,10 @@ export function createRateLimitDirective<TContext>(
 ): typeof SchemaDirectiveVisitor {
   const keyGenerator = options.keyGenerator
     ? options.keyGenerator
-    : (source: any, args: any, context: TContext, info: GraphQLResolveInfo) =>
+    : (source: any, args: any, context: TContext, info: GraphQLResolveInfo, directiveArgs: any) =>
         info.fieldName;
 
   return class extends SchemaDirectiveVisitor {
-    // static getDirectiveDeclaration(
-    //   directiveName: string = options.directiveName,
-    //   schema: GraphQLSchema,
-    // ) {
-    //   return new GraphQLDirective({
-    //     name: directiveName,
-    //     locations: [
-    //       DirectiveLocation.OBJECT,
-    //       DirectiveLocation.FIELD_DEFINITION,
-    //     ],
-    //     args: {
-    //       max: {
-    //         type: GraphQLInt,
-    //         defaultValue: 60,
-    //       },
-    //       period: {
-    //         type: schema.getType('RateLimitPeriod') as GraphQLEnumType,
-    //         defaultValue: 'MINUTE',
-    //       },
-    //     },
-    //   });
-    // }
     visitObject(object: GraphQLObjectType) {
       // Wrap fields for limiting that don't have their own @rateLimit
       const fields = object.getFields();
@@ -159,7 +107,7 @@ export function createRateLimitDirective<TContext>(
         if (
           !directives ||
           !directives.some(
-            directive => directive.name.value === options.directiveName,
+            directive => directive.name.value === 'rateLimit',
           )
         ) {
           this.limit(field);
@@ -172,10 +120,9 @@ export function createRateLimitDirective<TContext>(
     limit(field: GraphQLField<any, any>) {
       // Rate limit this field
       const { resolve = defaultFieldResolver } = field;
-      field.resolve = async (...args) => {
-        const key = keyGenerator(...args);
-        console.log(`${key}: ${this.args.max}/${this.args.period}`);
-        return resolve.apply(this, args);
+      field.resolve = async (source, args, context, info) => {
+        const key = keyGenerator(source, args, context, info, this.args);
+        return resolve.apply(this, [source, args, context, info]);
       };
     }
   }
