@@ -38,11 +38,11 @@ jobs:
 
       - run:
           name: Running prettier
-          command: yarn run prettier:ci
+          command: yarn run ci:lint:fmt
 
       - run:
           name: Running tslint
-          command: yarn run tslint:ci
+          command: yarn run ci:lint:ts
 
       - run:
           name: Running typechecker

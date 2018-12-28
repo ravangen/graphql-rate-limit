@@ -94,8 +94,13 @@ export function createRateLimitDirective<TContext>(
 ): typeof SchemaDirectiveVisitor {
   const keyGenerator = options.keyGenerator
     ? options.keyGenerator
-    : (source: any, args: any, context: TContext, info: GraphQLResolveInfo, directiveArgs: any) =>
-        info.fieldName;
+    : (
+        source: any,
+        args: any,
+        context: TContext,
+        info: GraphQLResolveInfo,
+        directiveArgs: any,
+      ) => info.fieldName;
 
   return class extends SchemaDirectiveVisitor {
     visitObject(object: GraphQLObjectType) {
@@ -106,9 +111,7 @@ export function createRateLimitDirective<TContext>(
         const directives = field.astNode.directives;
         if (
           !directives ||
-          !directives.some(
-            directive => directive.name.value === 'rateLimit',
-          )
+          !directives.some(directive => directive.name.value === 'rateLimit')
         ) {
           this.limit(field);
         }
@@ -125,5 +128,5 @@ export function createRateLimitDirective<TContext>(
         return resolve.apply(this, [source, args, context, info]);
       };
     }
-  }
+  };
 }
