@@ -36,8 +36,8 @@ const resolvers = {
 
 // Define custom key generator to log where rate limiting logic would be applied
 const logKeyGenerator = (source, args, context, info, directiveArgs) => {
-  console.log(`${info.fieldName}: ${directiveArgs.max}/${directiveArgs.period}`);
-  return info.fieldName;
+  console.log(`${info.parentType}.${info.fieldName}: ${directiveArgs.max}/${directiveArgs.period}`);
+  return `${info.parentType}.${info.fieldName}`;
 }
 
 const server = new ApolloServer({

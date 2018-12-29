@@ -49,12 +49,24 @@ export const rateLimitTypeDefs = gql`
   }
 `;
 
+export enum RateLimitPeriod {
+  Second = 'SECOND',
+  Minute = 'MINUTE',
+  Hour = 'HOUR',
+  Day = 'DAY',
+}
+
+export interface RateLimitArgs {
+  max: number;
+  period: RateLimitPeriod;
+}
+
 export type RateLimitKeyGenerator<TContext> = (
   source: any,
-  args: any,
+  args: { [key: string]: any },
   context: TContext,
   info: GraphQLResolveInfo,
-  directiveArgs: any,
+  directiveArgs: RateLimitArgs,
 ) => string;
 
 // Store mirrors what express-rate-limit defines: https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/express-rate-limit
@@ -84,25 +96,25 @@ export interface Store {
 export type StoreIncrementCallback = (error?: {}, hitCount?: number) => void;
 
 export interface IOptions<TContext> {
+  directiveName?: string;
   keyGenerator?: RateLimitKeyGenerator<TContext>;
   onLimitReached?: Function;
   store?: Store;
 }
 
-export function createRateLimitDirective<TContext>(
-  options: IOptions<TContext> = {},
-): typeof SchemaDirectiveVisitor {
-  const keyGenerator = options.keyGenerator
-    ? options.keyGenerator
-    : (
-        source: any,
-        args: any,
-        context: TContext,
-        info: GraphQLResolveInfo,
-        directiveArgs: any,
-      ) => info.fieldName;
-
+export function createRateLimitDirective<TContext>({
+  directiveName = 'rateLimit',
+  keyGenerator = (
+    source: any,
+    args: { [key: string]: any },
+    context: TContext,
+    info: GraphQLResolveInfo,
+    directiveArgs: RateLimitArgs,
+  ) => `${info.parentType}.${info.fieldName}`,
+}: IOptions<TContext> = {}): typeof SchemaDirectiveVisitor {
   return class extends SchemaDirectiveVisitor {
+    args: RateLimitArgs;
+
     visitObject(object: GraphQLObjectType) {
       // Wrap fields for limiting that don't have their own @rateLimit
       const fields = object.getFields();
@@ -111,17 +123,18 @@ export function createRateLimitDirective<TContext>(
         const directives = field.astNode.directives;
         if (
           !directives ||
-          !directives.some(directive => directive.name.value === 'rateLimit')
+          !directives.some(directive => directive.name.value === directiveName)
         ) {
-          this.limit(field);
+          this.rateLimit(field);
         }
       });
     }
-    visitFieldDefinition(field: GraphQLField<any, any>) {
-      this.limit(field);
+
+    visitFieldDefinition(field: GraphQLField<any, TContext>) {
+      this.rateLimit(field);
     }
-    limit(field: GraphQLField<any, any>) {
-      // Rate limit this field
+
+    rateLimit(field: GraphQLField<any, TContext>) {
       const { resolve = defaultFieldResolver } = field;
       field.resolve = async (source, args, context, info) => {
         const key = keyGenerator(source, args, context, info, this.args);
