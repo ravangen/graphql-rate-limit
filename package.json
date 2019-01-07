@@ -46,7 +46,7 @@
     "rate-limiter-flexible": "^0.21.2"
   },
   "devDependencies": {
-    "@types/graphql": "14.0.3",
+    "@types/graphql": "14.0.4",
     "@types/jest": "23.3.10",
     "@types/node": "10.12.18",
     "jest": "23.6.0",
