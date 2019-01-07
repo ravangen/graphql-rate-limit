@@ -6,6 +6,11 @@ import {
 } from 'graphql';
 import gql from 'graphql-tag';
 import { SchemaDirectiveVisitor } from 'graphql-tools';
+import {
+  IRateLimiterOptions,
+  RateLimiterAbstract,
+  RateLimiterMemory,
+} from 'rate-limiter-flexible';
 
 export const rateLimitTypeDefs = gql`
   """
@@ -15,50 +20,18 @@ export const rateLimitTypeDefs = gql`
     """
     Quantity that is allowed per period.
     """
-    max: Int = 60
+    limit: Int = 60
 
     """
-    Unit of time being observed.
+    Number of seconds before limit is reset.
     """
-    period: RateLimitPeriod = MINUTE
+    duration: Int = 60
   ) on OBJECT | FIELD_DEFINITION
-
-  """
-  Unit of time to measure usage over.
-  """
-  enum RateLimitPeriod {
-    """
-    Smallest unit of measurement.
-    """
-    SECOND
-
-    """
-    60 seconds.
-    """
-    MINUTE
-
-    """
-    60 minutes.
-    """
-    HOUR
-
-    """
-    24 hours.
-    """
-    DAY
-  }
 `;
 
-export enum RateLimitPeriod {
-  Second = 'SECOND',
-  Minute = 'MINUTE',
-  Hour = 'HOUR',
-  Day = 'DAY',
-}
-
 export interface RateLimitArgs {
-  max: number;
-  period: RateLimitPeriod;
+  limit: number;
+  duration: number;
 }
 
 export type RateLimitKeyGenerator<TContext> = (
@@ -69,37 +42,15 @@ export type RateLimitKeyGenerator<TContext> = (
   directiveArgs: RateLimitArgs,
 ) => string;
 
-// Store mirrors what express-rate-limit defines: https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/express-rate-limit
-export interface Store {
-  /**
-   * Increments the value in the underlying store for the given key.
-   * @param key The key to use as the unique identifier passed down from RateLimit.
-   * @param cb The callback issued when the underlying store is finished.
-   */
-  incr(key: string, cb: StoreIncrementCallback): void;
-  /**
-   * Decrements the value in the underlying store for the given key.
-   * @param key The key to use as the unique identifier passed down from RateLimit.
-   */
-  decrement(key: string): void;
-  /**
-   * Resets a value with the given key.
-   * @param key The key to use as the unique identifier passed down from RateLimit.
-   */
-  resetKey(key: string): void;
-}
-
-/**
- * @param error Error (usually null). If null, it means operation was successfully attempted.
- * @param hitCount Current number of occurrences for the given key.
- */
-export type StoreIncrementCallback = (error?: {}, hitCount?: number) => void;
-
 export interface IOptions<TContext> {
   directiveName?: string;
   keyGenerator?: RateLimitKeyGenerator<TContext>;
   onLimitReached?: Function;
-  store?: Store;
+  limiterClass?: typeof RateLimiterAbstract;
+  limiterOptions?: Exclude<
+    IRateLimiterOptions,
+    { points?: number; duration?: number }
+  >;
 }
 
 export function createRateLimitDirective<TContext>({
@@ -111,6 +62,7 @@ export function createRateLimitDirective<TContext>({
     info: GraphQLResolveInfo,
     directiveArgs: RateLimitArgs,
   ) => `${info.parentType}.${info.fieldName}`,
+  limiterClass = RateLimiterMemory,
 }: IOptions<TContext> = {}): typeof SchemaDirectiveVisitor {
   return class extends SchemaDirectiveVisitor {
     args: RateLimitArgs;

@@ -16,13 +16,14 @@ A limited set of context information is available from [`ValidationContext`](htt
 
 ### GraphQL Directive
 
-A [directive](https://graphql.org/learn/queries/#directives) can be attached to a field or fragment inclusion, and can affect execution of the query in any way the server desires. For example, it dynamically change the structure and shape of queries using variables. 
+A [directive](https://graphql.org/learn/queries/#directives) can be attached to a field or fragment inclusion, and can affect execution of the query in any way the server desires. For example, it dynamically change the structure and shape of queries using variables.
 
 Directives encourage mixing the schema with functionality.
 
 Custom directives are now easy to create and define on the server, but early in [graphql-js's history (#41)](https://github.com/graphql/graphql-js/issues/41#issuecomment-130554729), user-supplied directives were not an objective.
 
 A graphql-js RFC exists to add [support for repeatable directives (#1541)](https://github.com/graphql/graphql-js/pull/1541). This is to adjust the spec's [Directives Are Unique Per Location](https://facebook.github.io/graphql/June2018/#sec-Directives-Are-Unique-Per-Location). Currently, multiple `@rateLimit` directives could not be defined on the same location.
+
 > Directives are used to describe some metadata or behavioral change on the definition they apply to. When more than one directive of the same name is used, the expected metadata or behavior becomes ambiguous, therefore only one of each directive is allowed per location.
 
 #### Gist
@@ -59,26 +60,11 @@ Valid periods of time: `second`, `minute`, `hour`, or `day`
 Ideally this is available in the [execution `context`](https://graphql.org/learn/execution/).
 
 Information could include:
+
 - Remote IP address
 - User Id
 - Application Id
 
 ## Stores
 
-The storage to use when persisting rate limit attempts.
-
-Use the same Store inferface of [Express Rate Limit](https://github.com/nfriedly/express-rate-limit#store).
-
-```typescript
-interface Store {
-  incr(key: string, cb: StoreIncrementCallback): void;
-  decrement(key: string): void;
-  resetKey(key: string): void;
-}
-```
-
-Available data stores are:
-
-- MemoryStore: _(default)_ Simple in-memory option. Does not share state when app has multiple processes or servers.
-- [rate-limit-redis](https://npmjs.com/package/rate-limit-redis): A [Redis](http://redis.io/)-backed store, more suitable for large or demanding deployments.
-- [rate-limit-memcached](https://npmjs.org/package/rate-limit-memcached): A [Memcached](https://memcached.org/)-backed store.
+The storage to use when persisting rate limit attempts via `rate-limiter-flexible`.

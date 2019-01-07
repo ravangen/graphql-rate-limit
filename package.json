@@ -42,7 +42,8 @@
   "dependencies": {
     "graphql": "^14.0.2",
     "graphql-tag": "^2.10.0",
-    "graphql-tools": "^4.0.0"
+    "graphql-tools": "^4.0.0",
+    "rate-limiter-flexible": "^0.21.2"
   },
   "devDependencies": {
     "@types/graphql": "14.0.3",
