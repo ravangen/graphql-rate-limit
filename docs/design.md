@@ -49,8 +49,6 @@ GraphQL Middleware enables running arbitrary code before or after a resolver is 
 - Burst (60/minute)
 - Sustained (1000/day)
 
-Valid periods of time: `second`, `minute`, `hour`, or `day`
-
 ### Nodes
 
 - Number of records being accessed

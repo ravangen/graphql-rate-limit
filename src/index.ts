@@ -3,6 +3,7 @@ import {
   GraphQLField,
   GraphQLObjectType,
   GraphQLResolveInfo,
+  GraphQLError,
 } from 'graphql';
 import gql from 'graphql-tag';
 import { SchemaDirectiveVisitor } from 'graphql-tools';
@@ -47,9 +48,12 @@ export interface IOptions<TContext> {
   keyGenerator?: RateLimitKeyGenerator<TContext>;
   onLimitReached?: Function;
   limiterClass?: typeof RateLimiterAbstract;
-  limiterOptions?: Exclude<
+  limiterOptions?: Pick<
     IRateLimiterOptions,
-    { points?: number; duration?: number }
+    Exclude<
+      keyof IRateLimiterOptions,
+      keyof { points?: number; duration?: number }
+    >
   >;
 }
 
@@ -62,8 +66,16 @@ export function createRateLimitDirective<TContext>({
     info: GraphQLResolveInfo,
     directiveArgs: RateLimitArgs,
   ) => `${info.parentType}.${info.fieldName}`,
+  onLimitReached = () => {
+    throw new GraphQLError('RATE LIMITED');
+  },
   limiterClass = RateLimiterMemory,
+  limiterOptions = {},
 }: IOptions<TContext> = {}): typeof SchemaDirectiveVisitor {
+  const limiters = new Map<string, RateLimiterAbstract>();
+  const limiterKeyGenerator = ({ limit, duration }: RateLimitArgs): string =>
+    `${limit}/${duration}s`;
+
   return class extends SchemaDirectiveVisitor {
     args: RateLimitArgs;
 
@@ -86,10 +98,30 @@ export function createRateLimitDirective<TContext>({
       this.rateLimit(field);
     }
 
-    rateLimit(field: GraphQLField<any, TContext>) {
+    private getLimiter(): RateLimiterAbstract {
+      const limiterKey = limiterKeyGenerator(this.args);
+      let limiter = limiters.get(limiterKey);
+      if (limiter === undefined) {
+        limiter = new limiterClass({
+          ...limiterOptions,
+          points: this.args.limit,
+          duration: this.args.duration,
+        });
+        limiters.set(limiterKey, limiter);
+      }
+      return limiter;
+    }
+
+    private rateLimit(field: GraphQLField<any, TContext>) {
       const { resolve = defaultFieldResolver } = field;
+      const limiter = this.getLimiter();
       field.resolve = async (source, args, context, info) => {
         const key = keyGenerator(source, args, context, info, this.args);
+        try {
+          await limiter.consume(key);
+        } catch (e) {
+          return onLimitReached();
+        }
         return resolve.apply(this, [source, args, context, info]);
       };
     }
