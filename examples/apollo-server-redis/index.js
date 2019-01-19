@@ -39,7 +39,7 @@ const resolvers = {
 };
 
 // Define custom key generator to log where rate limiting logic would be applied
-const logKeyGenerator = (source, args, context, info, directiveArgs) => {
+const logKeyGenerator = (directiveArgs, source, args, context, info) => {
   console.log(
     `${info.parentType}.${info.fieldName}: ${directiveArgs.limit}/${
       directiveArgs.duration

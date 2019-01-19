@@ -36,11 +36,11 @@ export interface RateLimitArgs {
 }
 
 export type RateLimitKeyGenerator<TContext> = (
+  directiveArgs: RateLimitArgs,
   source: any,
   args: { [key: string]: any },
   context: TContext,
   info: GraphQLResolveInfo,
-  directiveArgs: RateLimitArgs,
 ) => string;
 
 export interface IOptions<TContext> {
@@ -60,11 +60,11 @@ export interface IOptions<TContext> {
 export function createRateLimitDirective<TContext>({
   directiveName = 'rateLimit',
   keyGenerator = (
+    directiveArgs: RateLimitArgs,
     source: any,
     args: { [key: string]: any },
     context: TContext,
     info: GraphQLResolveInfo,
-    directiveArgs: RateLimitArgs,
   ) => `${info.parentType}.${info.fieldName}`,
   onLimitReached = () => {
     throw new GraphQLError('RATE LIMITED');
