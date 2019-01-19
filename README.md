@@ -7,6 +7,7 @@ Basic rate-limiting directive for GraphQL. Use to limit repeated requests to que
 ## Features
 
 - 📦 **Storage**: Supports multiple data store choices
+- ♾️ **Throttles**: Define any number of limits per field
 - 😍 **TypeScript**: Written in and exports type definitions
 
 ### Data Storage
@@ -14,6 +15,34 @@ Basic rate-limiting directive for GraphQL. Use to limit repeated requests to que
 Supports [_Redis_](https://github.com/animir/node-rate-limiter-flexible/wiki/Redis), process [_Memory_](https://github.com/animir/node-rate-limiter-flexible/wiki/Memory), [_Cluster_](https://github.com/animir/node-rate-limiter-flexible/wiki/Cluster) or [_PM2_](https://github.com/animir/node-rate-limiter-flexible/wiki/PM2-cluster), [_Memcached_](https://github.com/animir/node-rate-limiter-flexible/wiki/Memcache), [_MongoDB_](https://github.com/animir/node-rate-limiter-flexible/wiki/Mongo), [_MySQL_](https://github.com/animir/node-rate-limiter-flexible/wiki/MySQL), [_PostgreSQL_](https://github.com/animir/node-rate-limiter-flexible/wiki/PostgreSQL) to control requests rate in single process or distributed environment. Storage options are provided by [`node-rate-limiter-flexible`](https://github.com/animir/node-rate-limiter-flexible).
 
 Memory store is the default but _not_ recommended for production as it does not share state with other servers or processes.
+
+### Multiple Throttles
+
+Multiple throttles can be used if you want to impose both burst throttling rates, and sustained throttling rates. For example, you might want to limit a user to a maximum of 60 requests per minute, and 1000 requests per day.
+
+Multiple schema directives can be created using different names and assigned to the same location. Provide the `directiveName` option to `createRateLimitDirective()`.
+
+```typescript
+const schema = makeExecutableSchema({
+  ...
+  schemaDirectives: {
+    burstRateLimit: createRateLimitDirective({directiveName: 'burstRateLimit'}),
+    sustainedRateLimit: createRateLimitDirective({directiveName: 'sustainedRateLimit'}),
+  },
+});
+```
+
+```graphql
+type Query {
+  books: [Book]
+    @burstRateLimit(limit: 10, duration: 60)
+    @sustainedRateLimit(limit: 200, period: 3600)
+}
+```
+
+#### Unique Directives
+
+As of the June 2018 version of the GraphQL specification, [Directives Are Unique Per Location](https://facebook.github.io/graphql/June2018/#sec-Directives-Are-Unique-Per-Location). A spec [RFC to "Limit directive uniqueness to explicitly marked directives"](https://github.com/facebook/graphql/pull/472) is currently at [Stage 2: Draft](https://github.com/facebook/graphql/blob/master/CONTRIBUTING.md#stage-2-draft). As a result, multiple `@rateLimit` directives can not be defined on the same location.
 
 ## Contributions
 
