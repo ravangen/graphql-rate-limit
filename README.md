@@ -7,6 +7,7 @@ Basic rate-limiting directive for GraphQL. Use to limit repeated requests to que
 ## Features
 
 - 📦 **Storage**: Supports multiple data store choices
+- 😍 **TypeScript**: Written in and exports type definitions
 
 ### Data Storage
 
