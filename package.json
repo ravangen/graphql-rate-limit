@@ -47,7 +47,7 @@
   },
   "devDependencies": {
     "@types/graphql": "14.0.5",
-    "@types/jest": "23.3.12",
+    "@types/jest": "23.3.13",
     "@types/node": "10.12.18",
     "jest": "23.6.0",
     "prettier": "1.15.3",
