@@ -46,15 +46,15 @@
     "rate-limiter-flexible": "^0.21.2"
   },
   "devDependencies": {
-    "@types/graphql": "14.0.4",
-    "@types/jest": "23.3.12",
+    "@types/graphql": "14.0.5",
+    "@types/jest": "23.3.13",
     "@types/node": "10.12.18",
     "jest": "23.6.0",
     "prettier": "1.15.3",
     "ts-jest": "23.10.5",
-    "tslint": "5.12.0",
+    "tslint": "5.12.1",
     "tslint-config-prettier": "1.17.0",
     "tslint-config-standard": "8.0.1",
-    "typescript": "3.2.2"
+    "typescript": "3.2.4"
   }
 }
