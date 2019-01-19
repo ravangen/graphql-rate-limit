@@ -116,7 +116,7 @@ export function createRateLimitDirective<TContext>({
       const { resolve = defaultFieldResolver } = field;
       const limiter = this.getLimiter();
       field.resolve = async (source, args, context, info) => {
-        const key = keyGenerator(source, args, context, info, this.args);
+        const key = keyGenerator(this.args, source, args, context, info);
         try {
           await limiter.consume(key);
         } catch (e) {
