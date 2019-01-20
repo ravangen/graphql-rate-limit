@@ -6,10 +6,19 @@ Basic fixed window rate limiting directive for GraphQL. Use to limit repeated re
 
 ## Features
 
-- 🎯 **Per-Type or Per-Field**: Limit types and specific fields
+- 📇 **Identification**: Distinguish requests using resolver data ([`parent, args, context, info`](https://graphql.org/learn/execution/#root-fields-resolvers))
+- 🎯 **Per-Type or Per-Field**: Limit by types and specific fields
 - 📦 **Storage**: Supports multiple data store choices
 - ♾️ **Throttles**: Define any number of limits per field
 - 😍 **TypeScript**: Written in and exports type definitions
+
+### Request Identification
+
+A key is generated to identify each request for each field being rate limited. The key is recommended to be unique per field to ensure isolation.
+
+By default, a rate limited field is identified by the key `${info.parentType}.${info.fieldName}`. This does _not_ provide user or client independent rate limiting. User A could consume all the capacity and starve out User B.
+
+Provide a customized `keyGenerator` to use `context` information to ensure user/client isolation.
 
 ### Target Types and Fields
 

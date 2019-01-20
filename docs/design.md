@@ -34,17 +34,6 @@ In [spectrum #2874](https://github.com/withspectrum/spectrum/pull/2874#issuecomm
 
 A limited set of context information is available from [`ValidationContext`](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/graphql/validation/ValidationContext.d.ts). This is **not** the resolver context which commonly holds important contextual information like the currently logged in user.
 
-## Advanced Cases
-
-### Multiple Rates
-
-- Burst (60/minute)
-- Sustained (1000/day)
-
-### Nodes
-
-- Number of records being accessed
-
 ### Client Identification
 
 Ideally this is available in the [execution `context`](https://graphql.org/learn/execution/).
