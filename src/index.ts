@@ -11,6 +11,7 @@ import {
   IRateLimiterOptions,
   RateLimiterAbstract,
   RateLimiterMemory,
+  RateLimiterRes,
 } from 'rate-limiter-flexible';
 
 export const rateLimitTypeDefs = gql`
@@ -43,10 +44,18 @@ export type RateLimitKeyGenerator<TContext> = (
   info: GraphQLResolveInfo,
 ) => string;
 
+export type RateLimitThrottle<TContext> = (
+  resource: RateLimiterRes,
+  source: any,
+  args: { [key: string]: any },
+  context: TContext,
+  info: GraphQLResolveInfo,
+) => any;
+
 export interface IOptions<TContext> {
   directiveName?: string;
   keyGenerator?: RateLimitKeyGenerator<TContext>;
-  onLimitReached?: Function;
+  throttle?: RateLimitThrottle<TContext>;
   limiterClass?: typeof RateLimiterAbstract;
   limiterOptions?: Pick<
     IRateLimiterOptions,
@@ -58,6 +67,7 @@ export interface IOptions<TContext> {
 }
 
 export function createRateLimitDirective<TContext>({
+  // TODO: may be enough to use this.name on SchemaDirectiveVisitor
   directiveName = 'rateLimit',
   keyGenerator = (
     directiveArgs: RateLimitArgs,
@@ -66,8 +76,18 @@ export function createRateLimitDirective<TContext>({
     context: TContext,
     info: GraphQLResolveInfo,
   ) => `${info.parentType}.${info.fieldName}`,
-  onLimitReached = () => {
-    throw new GraphQLError('RATE LIMITED');
+  throttle = (
+    resource: RateLimiterRes,
+    source: any,
+    args: { [key: string]: any },
+    context: TContext,
+    info: GraphQLResolveInfo,
+  ): any => {
+    throw new GraphQLError(
+      `Too many requests, please try again in ${Math.ceil(
+        resource.msBeforeNext / 1000,
+      )} seconds.`,
+    );
   },
   limiterClass = RateLimiterMemory,
   limiterOptions = {},
@@ -120,7 +140,12 @@ export function createRateLimitDirective<TContext>({
         try {
           await limiter.consume(key);
         } catch (e) {
-          return onLimitReached();
+          if (e instanceof Error) {
+            throw e;
+          }
+
+          const resource = e as RateLimiterRes;
+          return throttle(resource, source, args, context, info);
         }
         return resolve.apply(this, [source, args, context, info]);
       };
