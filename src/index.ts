@@ -124,6 +124,10 @@ export function createRateLimitDirective<TContext>({
       if (limiter === undefined) {
         limiter = new limiterClass({
           ...limiterOptions,
+          keyPrefix:
+            limiterOptions.keyPrefix === undefined
+              ? directiveName // change default behaviour which is to use 'rlflx'
+              : limiterOptions.keyPrefix,
           points: this.args.limit,
           duration: this.args.duration,
         });
