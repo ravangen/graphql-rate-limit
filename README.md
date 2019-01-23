@@ -1,6 +1,6 @@
 # GraphQL Rate Limit
 
-[![CircleCI](https://circleci.com/gh/ravangen/graphql-rate-limit.svg?style=shield&circle-token=5115eed32e1e82d43eb00140580186fb8e1563f6)](https://circleci.com/gh/ravangen/graphql-rate-limit) [![Renovate enabled](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://renovateapp.com/)
+[![CircleCI](https://circleci.com/gh/ravangen/graphql-rate-limit.svg?style=shield&circle-token=5115eed32e1e82d43eb00140580186fb8e1563f6)](https://circleci.com/gh/ravangen/graphql-rate-limit) [![Renovate enabled](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://renovateapp.com/) [![npm version](https://img.shields.io/npm/v/graphql-rate-limit-directive.svg?style=popout)](https://www.npmjs.com/package/graphql-rate-limit-directive)
 
 Basic fixed window rate limiting directive for GraphQL. Use to limit repeated requests to queries and/or mutations.
 
