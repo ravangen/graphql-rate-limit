@@ -4,6 +4,8 @@
 
 Basic fixed window rate limiting directive for GraphQL. Use to limit repeated requests to queries and/or mutations.
 
+**WARNING**: This package is not yet tested and thus not recommended for production usage.
+
 ## Features
 
 - 📇 **Identification**: Distinguish requests using resolver data ([`parent, args, context, info`](https://graphql.org/learn/execution/#root-fields-resolvers))
@@ -65,6 +67,8 @@ type Query {
     @sustainedRateLimit(limit: 200, period: 3600)
 }
 ```
+
+**WARNING**: If providing the `keyPrefix` option to `createRateLimitDirective`, consider using `directiveName` as part of the prefix to ensure isolation between different directives.
 
 #### Unique Directives
 
