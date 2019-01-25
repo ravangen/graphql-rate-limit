@@ -29,6 +29,7 @@
   "keywords": [
     "graphql",
     "graphql-js",
+    "directive",
     "middleware",
     "schema",
     "resolvers",

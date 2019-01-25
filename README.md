@@ -48,14 +48,19 @@ Memory store is the default but _not_ recommended for production as it does not 
 
 Multiple throttles can be used if you want to impose both burst throttling rates, and sustained throttling rates. For example, you might want to limit a user to a maximum of 60 requests per minute, and 1000 requests per day.
 
-Multiple schema directives can be created using different names and assigned to the same location. Provide the `directiveName` option to `createRateLimitDirective()`.
+Multiple schema directives can be created using different names and assigned to the same location.
 
 ```typescript
 const schema = makeExecutableSchema({
-  ...
+  typeDefs: [
+    createRateLimitTypeDef('burstRateLimit'),
+    createRateLimitTypeDef('sustainedRateLimit'),
+    typeDefs,
+  ],
+  resolvers,
   schemaDirectives: {
-    burstRateLimit: createRateLimitDirective({directiveName: 'burstRateLimit'}),
-    sustainedRateLimit: createRateLimitDirective({directiveName: 'sustainedRateLimit'}),
+    burstRateLimit: createRateLimitDirective(),
+    sustainedRateLimit: createRateLimitDirective(),
   },
 });
 ```
@@ -68,7 +73,7 @@ type Query {
 }
 ```
 
-**WARNING**: If providing the `keyPrefix` option to `createRateLimitDirective`, consider using `directiveName` as part of the prefix to ensure isolation between different directives.
+**WARNING**: If providing the `keyPrefix` option to `createRateLimitDirective`, consider using directive's name as part of the prefix to ensure isolation between different directives.
 
 #### Unique Directives
 

@@ -14,23 +14,6 @@ import {
   RateLimiterRes,
 } from 'rate-limiter-flexible';
 
-export const rateLimitTypeDefs = gql`
-  """
-  Controls the rate of traffic.
-  """
-  directive @rateLimit(
-    """
-    Quantity that is allowed per period.
-    """
-    limit: Int = 60
-
-    """
-    Number of seconds before limit is reset.
-    """
-    duration: Int = 60
-  ) on OBJECT | FIELD_DEFINITION
-`;
-
 export interface RateLimitArgs {
   limit: number;
   duration: number;
@@ -53,7 +36,6 @@ export type RateLimitThrottle<TContext> = (
 ) => any;
 
 export interface IOptions<TContext> {
-  directiveName?: string;
   keyGenerator?: RateLimitKeyGenerator<TContext>;
   throttle?: RateLimitThrottle<TContext>;
   limiterClass?: typeof RateLimiterAbstract;
@@ -66,9 +48,26 @@ export interface IOptions<TContext> {
   >;
 }
 
+export function createRateLimitTypeDef(directiveName: string = 'rateLimit') {
+  return gql`
+  """
+  Controls the rate of traffic.
+  """
+  directive @${directiveName}(
+    """
+    Quantity that is allowed per period.
+    """
+    limit: Int = 60
+
+    """
+    Number of seconds before limit is reset.
+    """
+    duration: Int = 60
+  ) on OBJECT | FIELD_DEFINITION
+`;
+}
+
 export function createRateLimitDirective<TContext>({
-  // TODO: may be enough to use this.name on SchemaDirectiveVisitor
-  directiveName = 'rateLimit',
   keyGenerator = (
     directiveArgs: RateLimitArgs,
     source: any,
@@ -97,7 +96,34 @@ export function createRateLimitDirective<TContext>({
     `${limit}/${duration}s`;
 
   return class extends SchemaDirectiveVisitor {
-    args: RateLimitArgs;
+    public readonly args: RateLimitArgs;
+
+    // Use createRateLimitTypeDef until graphql-tools fixes getDirectiveDeclaration
+    // public static getDirectiveDeclaration(
+    //   directiveName: string,
+    //   schema: GraphQLSchema,
+    // ): GraphQLDirective {
+    //   return new GraphQLDirective({
+    //     name: directiveName,
+    //     description: 'Controls the rate of traffic.',
+    //     locations: [
+    //       DirectiveLocation.FIELD_DEFINITION,
+    //       DirectiveLocation.OBJECT,
+    //     ],
+    //     args: {
+    //       limit: {
+    //         type: GraphQLInt,
+    //         defaultValue: 60,
+    //         description: 'Quantity that is allowed per period.',
+    //       },
+    //       duration: {
+    //         type: GraphQLInt,
+    //         defaultValue: 60,
+    //         description: 'Number of seconds before limit is reset.',
+    //       },
+    //     },
+    //   });
+    // }
 
     visitObject(object: GraphQLObjectType) {
       // Wrap fields for limiting that don't have their own @rateLimit
@@ -107,7 +133,7 @@ export function createRateLimitDirective<TContext>({
         const directives = field.astNode.directives;
         if (
           !directives ||
-          !directives.some(directive => directive.name.value === directiveName)
+          !directives.some(directive => directive.name.value === this.name)
         ) {
           this.rateLimit(field);
         }
@@ -126,7 +152,7 @@ export function createRateLimitDirective<TContext>({
           ...limiterOptions,
           keyPrefix:
             limiterOptions.keyPrefix === undefined
-              ? directiveName // change default behaviour which is to use 'rlflx'
+              ? this.name // change default behaviour which is to use 'rlflx'
               : limiterOptions.keyPrefix,
           points: this.args.limit,
           duration: this.args.duration,

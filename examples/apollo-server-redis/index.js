@@ -1,7 +1,7 @@
 const { ApolloServer, gql } = require('apollo-server');
 const {
   createRateLimitDirective,
-  rateLimitTypeDefs,
+  createRateLimitTypeDef,
 } = require('../../dist/index');
 
 const typeDefs = gql`
@@ -49,7 +49,7 @@ const logKeyGenerator = (directiveArgs, source, args, context, info) => {
 };
 
 const server = new ApolloServer({
-  typeDefs: [rateLimitTypeDefs, typeDefs],
+  typeDefs: [createRateLimitTypeDef(), typeDefs],
   resolvers,
   schemaDirectives: {
     rateLimit: createRateLimitDirective({
