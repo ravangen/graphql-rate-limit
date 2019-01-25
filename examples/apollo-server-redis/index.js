@@ -2,7 +2,7 @@ const { ApolloServer, gql } = require('apollo-server');
 const {
   createRateLimitDirective,
   createRateLimitTypeDef,
-} = require('../../dist/index');
+} = require('graphql-rate-limit-directive');
 
 const typeDefs = gql`
   # Apply default rate limiting to all fields of 'Query'
