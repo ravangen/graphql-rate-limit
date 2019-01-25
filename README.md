@@ -8,11 +8,77 @@ Basic fixed window rate limiting directive for GraphQL. Use to limit repeated re
 
 ## Features
 
-- 📇 **Identification**: Distinguish requests using resolver data ([`parent, args, context, info`](https://graphql.org/learn/execution/#root-fields-resolvers))
+- 📇 **Identification**: Distinguish requests using resolver data
 - 🎯 **Per-Type or Per-Field**: Limit by types and specific fields
 - 📦 **Storage**: Supports multiple data store choices
 - ♾️ **Throttles**: Define any number of limits per field
 - 😍 **TypeScript**: Written in and exports type definitions
+
+## Install
+
+`yarn add graphql-rate-limit-directive`
+
+## Example
+
+```javascript
+const { ApolloServer, gql } = require('apollo-server');
+const {
+  createRateLimitDirective,
+  createRateLimitTypeDef,
+} = require('graphql-rate-limit-directive');
+
+const typeDefs = gql`
+  # Apply default rate limiting to all fields of 'Query'
+  type Query @rateLimit {
+    books: [Book!]
+
+    # Override behaviour imposed from 'Query' type on this field to have a custom limit
+    quote: String @rateLimit(limit: 1)
+  }
+
+  type Book {
+    # For each 'Book' where this field is requested, rate limit
+    title: String @rateLimit(limit: 72000, duration: 3600)
+
+    author: String
+  }
+`;
+
+const resolvers = {
+  Query: {
+    books: () => [
+      {
+        title: 'A Game of Thrones',
+        author: 'George R. R. Martin',
+      },
+      {
+        title: 'The Hobbit',
+        author: 'J. R. R. Tolkien',
+      },
+    ],
+    quote: () =>
+      'The future is something which everyone reaches at the rate of sixty minutes an hour, whatever he does, whoever he is. ― C.S. Lewis',
+  },
+};
+
+const server = new ApolloServer({
+  typeDefs: [createRateLimitTypeDef(), typeDefs],
+  resolvers,
+  schemaDirectives: {
+    rateLimit: createRateLimitDirective(),
+  },
+});
+server
+  .listen()
+  .then(({ url }) => {
+    console.log(`🚀  Server ready at ${url}`);
+  })
+  .catch(error => {
+    console.error(error);
+  });
+```
+
+## Configuration
 
 ### Request Identification
 

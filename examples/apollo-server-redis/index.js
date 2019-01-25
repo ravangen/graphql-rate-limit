@@ -30,7 +30,7 @@ const resolvers = {
       },
       {
         title: 'The Hobbit',
-        author: '	J. R. R. Tolkien',
+        author: 'J. R. R. Tolkien',
       },
     ],
     quote: () =>
