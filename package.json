@@ -1,16 +1,7 @@
 {
   "name": "graphql-rate-limit-directive",
-  "description": "Basic fixed window rate-limiting directive for GraphQL. Use to limit repeated requests to queries and/or mutations.",
+  "description": "Basic fixed window rate-limiting directive for GraphQL. Use to limit repeated requests to queries and mutations.",
   "version": "0.0.2",
-  "homepage": "https://github.com/ravangen/graphql-rate-limit#readme",
-  "author": "Robert Van Gennip <ravangen@gmail.com>",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/ravangen/graphql-rate-limit.git"
-  },
-  "bugs": {
-    "url": "https://github.com/ravangen/graphql-rate-limit/issues"
-  },
   "license": "MIT",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -26,20 +17,6 @@
     "ci:lint:ts": "tslint --project tsconfig.json --config tslint.json 'src/**/*.ts'",
     "test": "jest"
   },
-  "keywords": [
-    "graphql",
-    "graphql-js",
-    "directive",
-    "middleware",
-    "schema",
-    "resolvers",
-    "rate",
-    "limit",
-    "ratelimit",
-    "rate-limit",
-    "cost",
-    "security"
-  ],
   "dependencies": {
     "graphql": "^14.0.2",
     "graphql-tag": "^2.10.0",
@@ -57,5 +34,28 @@
     "tslint-config-prettier": "1.17.0",
     "tslint-config-standard": "8.0.1",
     "typescript": "3.2.4"
-  }
+  },
+  "homepage": "https://github.com/ravangen/graphql-rate-limit#readme",
+  "author": "Robert Van Gennip <ravangen@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ravangen/graphql-rate-limit.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ravangen/graphql-rate-limit/issues"
+  },
+  "keywords": [
+    "graphql",
+    "graphql-js",
+    "directive",
+    "middleware",
+    "schema",
+    "resolvers",
+    "rate",
+    "limit",
+    "ratelimit",
+    "rate-limit",
+    "cost",
+    "security"
+  ]
 }
