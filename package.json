@@ -1,7 +1,7 @@
 {
   "name": "graphql-rate-limit-directive",
   "description": "Basic fixed window rate-limiting directive for GraphQL. Use to limit repeated requests to queries and/or mutations.",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "homepage": "https://github.com/ravangen/graphql-rate-limit#readme",
   "author": "Robert Van Gennip <ravangen@gmail.com>",
   "repository": {
