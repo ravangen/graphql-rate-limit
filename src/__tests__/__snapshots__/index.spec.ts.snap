@@ -39,6 +39,29 @@ Object {
 }
 `;
 
+exports[`createRateLimitDirective raises limiter error 1`] = `
+Object {
+  "data": Object {
+    "quote": null,
+  },
+  "errors": Array [
+    [GraphQLError: Some error happened],
+  ],
+}
+`;
+
+exports[`createRateLimitDirective throttles on limit reached 1`] = `
+Object {
+  "data": Object {
+    "firstQuote": "The future is something which everyone reaches at the rate of sixty minutes an hour, whatever he does, whoever he is. ― C.S. Lewis",
+    "secondQuote": null,
+  },
+  "errors": Array [
+    [GraphQLError: Too many requests, please try again in 1 seconds.],
+  ],
+}
+`;
+
 exports[`createRateLimitTypeDef creates custom directive definition 1`] = `
 Object {
   "definitions": Array [

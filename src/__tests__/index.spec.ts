@@ -4,7 +4,7 @@ import {
   makeExecutableSchema,
   IResolverValidationOptions,
 } from 'graphql-tools';
-import { RateLimiterMemory } from 'rate-limiter-flexible';
+import { RateLimiterMemory, RateLimiterRes } from 'rate-limiter-flexible';
 import { createRateLimitTypeDef, createRateLimitDirective } from '../index';
 
 describe('createRateLimitTypeDef', () => {
@@ -112,5 +112,66 @@ describe('createRateLimitDirective', () => {
     expect(consume).toHaveBeenCalledTimes(2);
     expect(consume).toHaveBeenCalledWith('Query.quote');
     expect(consume).toHaveBeenCalledWith('Query.books');
+  });
+  it('raises limiter error', async () => {
+    consume.mockImplementation(() => {
+      throw new Error('Some error happened');
+    });
+    const typeDefs = gql`
+      type Query {
+        quote: String @rateLimit
+      }
+    `;
+    const schema = makeExecutableSchema({
+      typeDefs: [createRateLimitTypeDef(), typeDefs],
+      resolvers,
+      resolverValidationOptions,
+      schemaDirectives: {
+        rateLimit: createRateLimitDirective(),
+      },
+    });
+
+    const response = await graphql(schema, 'query { quote }');
+
+    expect(response).toMatchSnapshot();
+    expect(consume).toHaveBeenCalledTimes(1);
+    expect(consume).toHaveBeenCalledWith('Query.quote');
+  });
+  it('throttles on limit reached', async () => {
+    consume
+      .mockResolvedValueOnce({
+        msBeforeNext: 250,
+        remainingPoints: 0,
+        consumedPoints: 1,
+        isFirstInDuration: true,
+      })
+      .mockRejectedValue({
+        msBeforeNext: 250,
+        remainingPoints: 0,
+        consumedPoints: 0,
+        isFirstInDuration: false,
+      });
+    const typeDefs = gql`
+      type Query {
+        quote: String @rateLimit(limit: 1)
+      }
+    `;
+    const schema = makeExecutableSchema({
+      typeDefs: [createRateLimitTypeDef(), typeDefs],
+      resolvers,
+      resolverValidationOptions,
+      schemaDirectives: {
+        rateLimit: createRateLimitDirective(),
+      },
+    });
+
+    const response = await graphql(
+      schema,
+      'query { firstQuote: quote secondQuote: quote }',
+    );
+
+    expect(response).toMatchSnapshot();
+    expect(consume).toHaveBeenCalledTimes(2);
+    expect(consume).toHaveBeenCalledWith('Query.quote');
   });
 });
