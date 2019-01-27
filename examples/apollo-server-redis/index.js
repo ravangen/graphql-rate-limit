@@ -9,7 +9,7 @@ const typeDefs = gql`
   type Query @rateLimit {
     books: [Book!]
 
-    # Override behaviour imposed from 'Query' type on this field to have a custom limit
+    # Override behaviour imposed from 'Query' object on this field to have a custom limit
     quote: String @rateLimit(limit: 1)
   }
 

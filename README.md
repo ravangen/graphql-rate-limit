@@ -7,7 +7,7 @@ Basic fixed window rate limiting directive for GraphQL. Use to limit repeated re
 ## Features
 
 - 📇 **Identification**: Distinguish requests using resolver data
-- 🎯 **Per-Type or Per-Field**: Limit by types and specific fields
+- 🎯 **Per-Object or Per-Field**: Limit by objects and specific fields
 - 📦 **Storage**: Supports multiple data store choices
 - ♾️ **Throttles**: Define any number of limits per field
 - 😍 **TypeScript**: Written in and exports type definitions
@@ -30,7 +30,7 @@ const typeDefs = gql`
   type Query @rateLimit {
     books: [Book!]
 
-    # Override behaviour imposed from 'Query' type on this field to have a custom limit
+    # Override behaviour imposed from 'Query' object on this field to have a custom limit
     quote: String @rateLimit(limit: 1)
   }
 
@@ -86,9 +86,9 @@ By default, a rate limited field is identified by the key `${info.parentType}.${
 
 Provide a customized `keyGenerator` to use `context` information to ensure user/client isolation.
 
-### Target Types and Fields
+### Target Objects and Fields
 
-Apply the directive to types and fields. When applied to a type, it rate limits each of its fields. A rate limit on a field will override a limit imposed by its parent type.
+Apply the directive to objects and fields. When applied to a object, it rate limits each of its fields. A rate limit on a field will override a limit imposed by its parent type.
 
 ```graphql
 # Apply default rate limiting to all fields of 'Query'
@@ -97,7 +97,7 @@ type Query @rateLimit(limit: 30, duration: 60) {
 
   authors: [Author!]
 
-  # Override behaviour imposed from 'Query' type on this field to have different limit
+  # Override behaviour imposed from 'Query' object on this field to have different limit
   quote: String @rateLimit(limit: 1, duration: 60)
 }
 ```
