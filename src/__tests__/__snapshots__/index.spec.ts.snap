@@ -8,6 +8,21 @@ Object {
 }
 `;
 
+exports[`createRateLimitDirective limits a repeated field 1`] = `
+Object {
+  "data": Object {
+    "books": Array [
+      Object {
+        "title": "A Game of Thrones",
+      },
+      Object {
+        "title": "The Hobbit",
+      },
+    ],
+  },
+}
+`;
+
 exports[`createRateLimitDirective limits an object 1`] = `
 Object {
   "data": Object {

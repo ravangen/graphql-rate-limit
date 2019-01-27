@@ -60,7 +60,32 @@ describe('createRateLimitDirective', () => {
     const response = await graphql(schema, 'query { quote }');
 
     expect(response).toMatchSnapshot();
+    expect(consume).toHaveBeenCalledTimes(1);
     expect(consume).toHaveBeenCalledWith('Query.quote');
+  });
+  it('limits a repeated field', async () => {
+    const typeDefs = gql`
+      type Query {
+        books: [Book!]
+      }
+      type Book {
+        title: String @rateLimit
+      }
+    `;
+    const schema = makeExecutableSchema({
+      typeDefs: [createRateLimitTypeDef(), typeDefs],
+      resolvers,
+      resolverValidationOptions,
+      schemaDirectives: {
+        rateLimit: createRateLimitDirective(),
+      },
+    });
+
+    const response = await graphql(schema, 'query { books { title } }');
+
+    expect(response).toMatchSnapshot();
+    expect(consume).toHaveBeenCalledTimes(2);
+    expect(consume).toHaveBeenCalledWith('Book.title');
   });
   it('limits an object', async () => {
     const typeDefs = gql`
@@ -84,6 +109,7 @@ describe('createRateLimitDirective', () => {
     const response = await graphql(schema, 'query { quote books { title } }');
 
     expect(response).toMatchSnapshot();
+    expect(consume).toHaveBeenCalledTimes(2);
     expect(consume).toHaveBeenCalledWith('Query.quote');
     expect(consume).toHaveBeenCalledWith('Query.books');
   });
