@@ -34,7 +34,7 @@ jobs:
 
       - run:
           name: Running tests
-          command: yarn run test
+          command: yarn run test --ci --coverage
 
       - run:
           name: Running prettier
@@ -47,3 +47,7 @@ jobs:
       - run:
           name: Running typechecker
           command: yarn run tsc
+
+      - run:
+          name: Upload coverage
+          command: bash <(curl -s https://codecov.io/bash) || echo 'Codecov failed to upload'
