@@ -29,6 +29,7 @@ export type RateLimitKeyGenerator<TContext> = (
 
 export type RateLimitThrottle<TContext> = (
   resource: RateLimiterRes,
+  directiveArgs: RateLimitArgs,
   source: any,
   args: { [key: string]: any },
   context: TContext,
@@ -77,6 +78,7 @@ export function createRateLimitDirective<TContext>({
   ) => `${info.parentType}.${info.fieldName}`,
   throttle = (
     resource: RateLimiterRes,
+    directiveArgs: RateLimitArgs,
     source: any,
     args: { [key: string]: any },
     context: TContext,
@@ -175,7 +177,7 @@ export function createRateLimitDirective<TContext>({
           }
 
           const resource = e as RateLimiterRes;
-          return throttle(resource, source, args, context, info);
+          return throttle(resource, this.args, source, args, context, info);
         }
         return resolve.apply(this, [source, args, context, info]);
       };
