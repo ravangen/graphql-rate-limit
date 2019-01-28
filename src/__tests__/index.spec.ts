@@ -4,7 +4,11 @@ import {
   makeExecutableSchema,
   IResolverValidationOptions,
 } from 'graphql-tools';
-import { RateLimiterMemory, RateLimiterRes } from 'rate-limiter-flexible';
+import {
+  IRateLimiterOptions,
+  RateLimiterMemory,
+  RateLimiterRes,
+} from 'rate-limiter-flexible';
 import {
   createRateLimitTypeDef,
   createRateLimitDirective,
@@ -261,5 +265,32 @@ describe('createRateLimitDirective', () => {
     expect(response).toMatchSnapshot();
     expect(consume).toHaveBeenCalledTimes(1);
     expect(consume).toHaveBeenCalledWith('Query.quote');
+  });
+  it('respects custom limiter keyPrefix option', async () => {
+    const keyPrefix = 'custom';
+    class TestRateLimiterMemory extends RateLimiterMemory {
+      constructor(opts: IRateLimiterOptions) {
+        super(opts);
+        expect(opts.keyPrefix).toBe(keyPrefix);
+      }
+    }
+    const typeDefs = gql`
+      type Query {
+        quote: String @rateLimit
+      }
+    `;
+    const schema = makeExecutableSchema({
+      typeDefs: [createRateLimitTypeDef(), typeDefs],
+      resolvers,
+      resolverValidationOptions,
+      schemaDirectives: {
+        rateLimit: createRateLimitDirective({
+          limiterClass: TestRateLimiterMemory,
+          limiterOptions: { keyPrefix },
+        }),
+      },
+    });
+
+    await graphql(schema, 'query { quote }');
   });
 });

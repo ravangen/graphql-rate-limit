@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "lib": ["es2017", "esnext.asynciterable"],
-    "target": "ES5",
+    "target": "es6",
     "module": "commonjs",
     "moduleResolution": "node",
     "sourceMap": true,
