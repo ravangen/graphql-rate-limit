@@ -567,15 +567,15 @@ graphql-extensions@0.4.1:
   dependencies:
     "@apollographql/apollo-tools" "^0.2.6"
 
-graphql-rate-limit-directive@0.0.2:
-  version "0.0.2"
-  resolved "https://registry.yarnpkg.com/graphql-rate-limit-directive/-/graphql-rate-limit-directive-0.0.2.tgz#8ca4254ee9c77a89018e7dedca9910f53136774e"
-  integrity sha512-PfNYxxBj9mxE4d518xc+iYX8s1fxnm/a5ZF7rD3HQTpJIbMk2ETcTVlRerEmxyHxkIrXDdXb6KuTIHE5e9CUHQ==
+graphql-rate-limit-directive@0.0.3:
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/graphql-rate-limit-directive/-/graphql-rate-limit-directive-0.0.3.tgz#5afdbf2f5b11fddf1cb5b5db7fd6896f6dd35e4b"
+  integrity sha512-F8PB9qvlhNvGI7MqaQwUohlJUvUL6o7KipXW3eL2XPgapvKandT+R6KLvewbkrnxR2hLsDOrDZRrMdt+r2NPGw==
   dependencies:
     graphql "^14.0.2"
     graphql-tag "^2.10.0"
     graphql-tools "^4.0.0"
-    rate-limiter-flexible "^0.21.2"
+    rate-limiter-flexible "^0.22.0"
 
 graphql-subscriptions@^1.0.0:
   version "1.0.0"
@@ -859,10 +859,10 @@ range-parser@~1.2.0:
   resolved "https://registry.yarnpkg.com/range-parser/-/range-parser-1.2.0.tgz#f49be6b487894ddc40dcc94a322f611092e00d5e"
   integrity sha1-9JvmtIeJTdxA3MlKMi9hEJLgDV4=
 
-rate-limiter-flexible@^0.21.2:
-  version "0.21.2"
-  resolved "https://registry.yarnpkg.com/rate-limiter-flexible/-/rate-limiter-flexible-0.21.2.tgz#119ef72e45db3d4ad55f0260109a5aeee555943f"
-  integrity sha512-HlAD3B/8eeN+bILGuvkUJaBNM318S+08xdk8iGCeqWAaB3P5zgpUUZTIGQLJO72uH2lr6lZNyeUAIkoHxJR5Wg==
+rate-limiter-flexible@^0.22.0:
+  version "0.22.0"
+  resolved "https://registry.yarnpkg.com/rate-limiter-flexible/-/rate-limiter-flexible-0.22.0.tgz#0e60bfbcb9ac1bc12cf44cd6b44a50ef64321560"
+  integrity sha512-PQrLM3XZNiudoAr0zqppW10LipKgwiZ3vP84zMVu6kl1OodO/4dVO2cir4UpAKWBoVZ5DFAP9rYBLHHnUZnWNw==
 
 raw-body@2.3.3:
   version "2.3.3"

@@ -5,6 +5,6 @@
   "license": "MIT",
   "dependencies": {
     "apollo-server": "2.3.1",
-    "graphql-rate-limit-directive": "0.0.2"
+    "graphql-rate-limit-directive": "0.0.3"
   }
 }

@@ -17,6 +17,7 @@ const typeDefs = gql`
     # For each 'Book' where this field is requested, rate limit
     title: String @rateLimit(limit: 72000, duration: 3600)
 
+    # No limits are applied
     author: String
   }
 `;
