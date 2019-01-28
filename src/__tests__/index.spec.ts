@@ -4,7 +4,7 @@ import {
   makeExecutableSchema,
   IResolverValidationOptions,
 } from 'graphql-tools';
-import { RateLimiterMemory } from 'rate-limiter-flexible';
+import { RateLimiterMemory, RateLimiterRes } from 'rate-limiter-flexible';
 import {
   createRateLimitTypeDef,
   createRateLimitDirective,
@@ -220,5 +220,46 @@ describe('createRateLimitDirective', () => {
     expect(response).toMatchSnapshot();
     expect(consume).toHaveBeenCalledTimes(1);
     expect(consume).toHaveBeenCalledWith('127.0 0.1:Query.quote');
+  });
+  it('respects custom throttle', async () => {
+    const consumeResponse = {
+      msBeforeNext: 1250,
+      remainingPoints: 0,
+      consumedPoints: 10,
+      isFirstInDuration: false,
+    };
+    consume.mockRejectedValue(consumeResponse);
+    const typeDefs = gql`
+      type Query {
+        quote: String @rateLimit(limit: 10, duration: 300)
+      }
+    `;
+    const throttle = (
+      resource: RateLimiterRes,
+      directiveArgs: RateLimitArgs,
+      source: any,
+      args: { [key: string]: any },
+      context: object,
+      info: GraphQLResolveInfo,
+    ) => {
+      expect(resource).toBe(consumeResponse);
+      expect(directiveArgs.limit).toBe(10);
+      expect(directiveArgs.duration).toBe(300);
+      return 'So comes snow after fire, and even dragons have their endings. ― Bilbo Baggins';
+    };
+    const schema = makeExecutableSchema({
+      typeDefs: [createRateLimitTypeDef(), typeDefs],
+      resolvers,
+      resolverValidationOptions,
+      schemaDirectives: {
+        rateLimit: createRateLimitDirective({ throttle }),
+      },
+    });
+
+    const response = await graphql(schema, 'query { quote }');
+
+    expect(response).toMatchSnapshot();
+    expect(consume).toHaveBeenCalledTimes(1);
+    expect(consume).toHaveBeenCalledWith('Query.quote');
   });
 });

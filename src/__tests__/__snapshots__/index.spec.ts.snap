@@ -58,6 +58,14 @@ Object {
 }
 `;
 
+exports[`createRateLimitDirective respects custom throttle 1`] = `
+Object {
+  "data": Object {
+    "quote": "So comes snow after fire, and even dragons have their endings. ― Bilbo Baggins",
+  },
+}
+`;
+
 exports[`createRateLimitDirective throttles on limit reached 1`] = `
 Object {
   "data": Object {
