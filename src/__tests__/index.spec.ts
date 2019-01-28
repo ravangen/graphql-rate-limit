@@ -1,11 +1,15 @@
-import { graphql } from 'graphql';
+import { graphql, GraphQLResolveInfo } from 'graphql';
 import gql from 'graphql-tag';
 import {
   makeExecutableSchema,
   IResolverValidationOptions,
 } from 'graphql-tools';
-import { RateLimiterMemory, RateLimiterRes } from 'rate-limiter-flexible';
-import { createRateLimitTypeDef, createRateLimitDirective } from '../index';
+import { RateLimiterMemory } from 'rate-limiter-flexible';
+import {
+  createRateLimitTypeDef,
+  createRateLimitDirective,
+  RateLimitArgs,
+} from '../index';
 
 describe('createRateLimitTypeDef', () => {
   it('creates custom directive definition', () => {
@@ -39,7 +43,7 @@ describe('createRateLimitDirective', () => {
     allowResolversNotInSchema: true,
   };
   beforeEach(() => {
-    consume.mockClear();
+    consume.mockReset();
   });
 
   it('limits a field', async () => {
@@ -148,7 +152,7 @@ describe('createRateLimitDirective', () => {
       .mockRejectedValue({
         msBeforeNext: 250,
         remainingPoints: 0,
-        consumedPoints: 0,
+        consumedPoints: 1,
         isFirstInDuration: false,
       });
     const typeDefs = gql`
@@ -173,5 +177,48 @@ describe('createRateLimitDirective', () => {
     expect(response).toMatchSnapshot();
     expect(consume).toHaveBeenCalledTimes(2);
     expect(consume).toHaveBeenCalledWith('Query.quote');
+  });
+  it('respects custom key generator', async () => {
+    const typeDefs = gql`
+      type Query {
+        quote: String @rateLimit(limit: 10, duration: 300)
+      }
+    `;
+    interface IContext {
+      ip: string;
+    }
+    const context: IContext = {
+      ip: '127.0 0.1',
+    };
+    const keyGenerator = (
+      directiveArgs: RateLimitArgs,
+      source: any,
+      args: { [key: string]: any },
+      context: IContext,
+      info: GraphQLResolveInfo,
+    ) => {
+      expect(directiveArgs.limit).toBe(10);
+      expect(directiveArgs.duration).toBe(300);
+      return `${context.ip}:${info.parentType}.${info.fieldName}`;
+    };
+    const schema = makeExecutableSchema({
+      typeDefs: [createRateLimitTypeDef(), typeDefs],
+      resolvers,
+      resolverValidationOptions,
+      schemaDirectives: {
+        rateLimit: createRateLimitDirective({ keyGenerator }),
+      },
+    });
+
+    const response = await graphql(
+      schema,
+      'query { quote }',
+      undefined,
+      context,
+    );
+
+    expect(response).toMatchSnapshot();
+    expect(consume).toHaveBeenCalledTimes(1);
+    expect(consume).toHaveBeenCalledWith('127.0 0.1:Query.quote');
   });
 });

@@ -145,7 +145,9 @@ As of the June 2018 version of the GraphQL specification, [Directives Are Unique
 
 ## Contributions
 
-Contributions, issues and feature requests are very welcome. If you are using this package and fixed a bug for yourself, please consider submitting a PR!
+Contributions, issues and feature requests are very welcome.
+
+If you are using this package and fixed a bug for yourself, please consider submitting a PR!
 
 ## License
 
