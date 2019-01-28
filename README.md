@@ -2,7 +2,7 @@
 
 [![CircleCI](https://img.shields.io/circleci/project/github/ravangen/graphql-rate-limit.svg?style=popout)](https://circleci.com/gh/ravangen/graphql-rate-limit) [![codecov](https://img.shields.io/codecov/c/github/ravangen/graphql-rate-limit.svg?style=popout)](https://codecov.io/gh/ravangen/graphql-rate-limit) [![npm version](https://img.shields.io/npm/v/graphql-rate-limit-directive.svg?style=popout)](https://www.npmjs.com/package/graphql-rate-limit-directive) [![npm downloads](https://img.shields.io/npm/dm/graphql-rate-limit-directive.svg?style=popout)](https://www.npmjs.com/package/graphql-rate-limit-directive)
 
-Basic fixed window rate limiting directive for GraphQL. Use to limit repeated requests to queries and mutations.
+Basic **fixed window** rate limiting directive for GraphQL. Use to limit repeated requests to queries and mutations.
 
 ## Features
 
@@ -14,9 +14,53 @@ Basic fixed window rate limiting directive for GraphQL. Use to limit repeated re
 
 ## Install
 
-`yarn add graphql-rate-limit-directive`
+```bash
+yarn add graphql-rate-limit-directive
+```
 
-## Example
+## How it works
+
+GraphQL Rate Limit wraps resolvers, ensuring an action is permitted before it is invoked. A client is allocated a maximum of `n` operations for every fixed size time window. Once the client has performed `n` operations, they must wait.
+
+### Usage
+
+#### Step 1: Include directive type definition
+
+Include `createRateLimitTypeDef()` as part of the schema's type definitions.
+
+```javascript
+const schema = makeExecutableSchema({
+  typeDefs: [createRateLimitTypeDef(), typeDefs],
+  ...
+});
+```
+
+#### Step 2: Include directive implementation
+
+Include `createRateLimitDirective()` as part of the schema's directives. This implementes the `@rateLimit` functionality.
+
+```javascript
+const schema = makeExecutableSchema({
+  schemaDirectives: {
+    rateLimit: createRateLimitDirective(),
+  },
+  ...
+});
+```
+
+#### Step 3: Attach directive to field or object
+
+Attach `@rateLimit` directive. Argument `limit` is number of allow operations per duration. Argument `duration` is the length of the fixed window (in seconds).
+
+```graphql
+# Apply rate limiting to all fields of 'Query'
+# Allow at most 60 queries per field within a minute
+type Query @rateLimit(limit: 60, duration: 60) {
+  ...
+}
+```
+
+### Example
 
 ```javascript
 const { ApolloServer, gql } = require('apollo-server');
@@ -38,6 +82,7 @@ const typeDefs = gql`
     # For each 'Book' where this field is requested, rate limit
     title: String @rateLimit(limit: 72000, duration: 3600)
 
+    # No limits are applied
     author: String
   }
 `;
