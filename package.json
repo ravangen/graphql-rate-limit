@@ -55,6 +55,7 @@
     "limit",
     "ratelimit",
     "rate-limit",
+    "graphql-rate-limit",
     "cost",
     "security"
   ]
