@@ -1,5 +1,4 @@
 {
-  "extends": [
-    "config:js-lib"
-  ]
+  "extends": ["config:js-lib"],
+  "schedule": "every weekend"
 }
