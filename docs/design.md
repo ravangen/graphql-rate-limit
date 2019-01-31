@@ -33,13 +33,3 @@ Validation runs synchronously, returning an array of encountered errors, or an e
 In [spectrum #2874](https://github.com/withspectrum/spectrum/pull/2874#issuecomment-381711121) Lee Byron notes that the rules tend to apply in both server and client (tooling) scenarios. He suggests not implementing rate limiting as a validation rule, but instead as it’s own step.
 
 A limited set of context information is available from [`ValidationContext`](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/graphql/validation/ValidationContext.d.ts). This is **not** the resolver context which commonly holds important contextual information like the currently logged in user.
-
-### Client Identification
-
-Ideally this is available in the [execution `context`](https://graphql.org/learn/execution/).
-
-Information could include:
-
-- Remote IP address
-- User Id
-- Application Id

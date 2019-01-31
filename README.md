@@ -6,7 +6,7 @@ Basic **fixed window** rate limiting directive for GraphQL. Use to limit repeate
 
 ## Features
 
-- 📇 **Identification**: Distinguish requests using resolver data
+- 👨‍💻 **Identification**: Distinguish requests using resolver data
 - 🎯 **Per-Object or Per-Field**: Limit by objects and specific fields
 - 📦 **Storage**: Supports multiple data store choices
 - ♾️ **Throttles**: Define any number of limits per field
@@ -61,6 +61,8 @@ type Query @rateLimit(limit: 60, duration: 60) {
 ```
 
 ### Example
+
+Additional, advanced examples are available in the [examples](examples) folder.
 
 ```javascript
 const { ApolloServer, gql } = require('apollo-server');
@@ -125,11 +127,11 @@ server
 
 ### Request Identification
 
-A key is generated to identify each request for each field being rate limited. The key is recommended to be unique per field to ensure isolation.
+A key is generated to identify each request for each field being rate limited. To ensure isolation, the key is recommended to be unique per field.
 
 By default, a rate limited field is identified by the key `${info.parentType}.${info.fieldName}`. This does _not_ provide user or client independent rate limiting. User A could consume all the capacity and starve out User B.
 
-Provide a customized `keyGenerator` to use `context` information to ensure user/client isolation.
+Provide a customized `keyGenerator` to use `context` information to ensure user/client isolation. See [context example](examples/context/README.md) for isolating requests.
 
 ### Target Objects and Fields
 
