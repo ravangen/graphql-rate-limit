@@ -434,6 +434,16 @@ dicer@0.2.5:
     readable-stream "1.1.x"
     streamsearch "0.1.2"
 
+dotenv@6.2.0:
+  version "6.2.0"
+  resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-6.2.0.tgz#941c0410535d942c8becf28d3f357dbd9d476064"
+  integrity sha512-HygQCKUBSFl8wKQZBSemMywRWcEDNidvNbjGVyZu3nbZ8qq9ubiPoGLMdRDpfSrpkkm9BXYFkpKxxFX38o/76w==
+
+double-ended-queue@^2.1.0-0:
+  version "2.1.0-0"
+  resolved "https://registry.yarnpkg.com/double-ended-queue/-/double-ended-queue-2.1.0-0.tgz#103d3527fd31528f40188130c841efdd78264e5c"
+  integrity sha1-ED01J/0xUo9AGIEwyEHv3XgmTlw=
+
 ee-first@1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/ee-first/-/ee-first-1.1.1.tgz#590c61156b0ae2f4f0255732a158b266bc56b21d"
@@ -567,10 +577,8 @@ graphql-extensions@0.4.1:
   dependencies:
     "@apollographql/apollo-tools" "^0.2.6"
 
-graphql-rate-limit-directive@0.0.3:
+graphql-rate-limit-directive@../../:
   version "0.0.3"
-  resolved "https://registry.yarnpkg.com/graphql-rate-limit-directive/-/graphql-rate-limit-directive-0.0.3.tgz#5afdbf2f5b11fddf1cb5b5db7fd6896f6dd35e4b"
-  integrity sha512-F8PB9qvlhNvGI7MqaQwUohlJUvUL6o7KipXW3eL2XPgapvKandT+R6KLvewbkrnxR2hLsDOrDZRrMdt+r2NPGw==
   dependencies:
     graphql "^14.0.2"
     graphql-tag "^2.10.0"
@@ -859,6 +867,11 @@ range-parser@~1.2.0:
   resolved "https://registry.yarnpkg.com/range-parser/-/range-parser-1.2.0.tgz#f49be6b487894ddc40dcc94a322f611092e00d5e"
   integrity sha1-9JvmtIeJTdxA3MlKMi9hEJLgDV4=
 
+rate-limiter-flexible@0.22.1:
+  version "0.22.1"
+  resolved "https://registry.yarnpkg.com/rate-limiter-flexible/-/rate-limiter-flexible-0.22.1.tgz#573d44900d9fbf726a7d95ad4de8d14518c7d249"
+  integrity sha512-ZRsM9T5vIxwwqqTHiSlyC8W28gErPzmCKm/dPrLKITkuHTpPX/j8zQuGRCgDeiaHRPo0qWfTMwJIFRw2rTAToQ==
+
 rate-limiter-flexible@^0.22.0:
   version "0.22.0"
   resolved "https://registry.yarnpkg.com/rate-limiter-flexible/-/rate-limiter-flexible-0.22.0.tgz#0e60bfbcb9ac1bc12cf44cd6b44a50ef64321560"
@@ -883,6 +896,25 @@ readable-stream@1.1.x:
     inherits "~2.0.1"
     isarray "0.0.1"
     string_decoder "~0.10.x"
+
+redis-commands@^1.2.0:
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/redis-commands/-/redis-commands-1.4.0.tgz#52f9cf99153efcce56a8f86af986bd04e988602f"
+  integrity sha512-cu8EF+MtkwI4DLIT0x9P8qNTLFhQD4jLfxLR0cCNkeGzs87FN6879JOJwNQR/1zD7aSYNbU0hgsV9zGY71Itvw==
+
+redis-parser@^2.6.0:
+  version "2.6.0"
+  resolved "https://registry.yarnpkg.com/redis-parser/-/redis-parser-2.6.0.tgz#52ed09dacac108f1a631c07e9b69941e7a19504b"
+  integrity sha1-Uu0J2srBCPGmMcB+m2mUHnoZUEs=
+
+redis@2.8.0:
+  version "2.8.0"
+  resolved "https://registry.yarnpkg.com/redis/-/redis-2.8.0.tgz#202288e3f58c49f6079d97af7a10e1303ae14b02"
+  integrity sha512-M1OkonEQwtRmZv4tEWF2VgpG0JWJ8Fv1PhlgT5+B+uNq2cA3Rt1Yt/ryoR+vQNOQcIEgdCdfH0jr3bDpihAw1A==
+  dependencies:
+    double-ended-queue "^2.1.0-0"
+    redis-commands "^1.2.0"
+    redis-parser "^2.6.0"
 
 retry@0.12.0:
   version "0.12.0"

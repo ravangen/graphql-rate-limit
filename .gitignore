@@ -1,6 +1,7 @@
 node_modules
 dist
 .DS_Store
+.env
 .vscode
 npm-debug.log
 package-lock.json

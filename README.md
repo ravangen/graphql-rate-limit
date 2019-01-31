@@ -151,7 +151,7 @@ type Query @rateLimit(limit: 30, duration: 60) {
 
 Supports [_Redis_](https://github.com/animir/node-rate-limiter-flexible/wiki/Redis), process [_Memory_](https://github.com/animir/node-rate-limiter-flexible/wiki/Memory), [_Cluster_](https://github.com/animir/node-rate-limiter-flexible/wiki/Cluster) or [_PM2_](https://github.com/animir/node-rate-limiter-flexible/wiki/PM2-cluster), [_Memcached_](https://github.com/animir/node-rate-limiter-flexible/wiki/Memcache), [_MongoDB_](https://github.com/animir/node-rate-limiter-flexible/wiki/Mongo), [_MySQL_](https://github.com/animir/node-rate-limiter-flexible/wiki/MySQL), [_PostgreSQL_](https://github.com/animir/node-rate-limiter-flexible/wiki/PostgreSQL) to control requests rate in single process or distributed environment. Storage options are provided by [`rate-limiter-flexible`](https://github.com/animir/node-rate-limiter-flexible).
 
-Memory store is the default but _not_ recommended for production as it does not share state with other servers or processes.
+Memory store is the default but _not_ recommended for production as it does not share state with other servers or processes. See [Redis example](examples/redis/README.md) for use in a distributed environment.
 
 ### Multiple Throttles
 

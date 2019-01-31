@@ -1,27 +1,24 @@
+require('dotenv').config();
 const { ApolloServer, gql } = require('apollo-server');
 const {
   createRateLimitDirective,
   createRateLimitTypeDef,
 } = require('graphql-rate-limit-directive');
+const { RateLimiterRedis } = require('rate-limiter-flexible');
+const redis = require('redis');
 
 const typeDefs = gql`
-  # Apply default rate limiting to all fields of 'Query'
-  type Query @rateLimit {
+  # Allow each field to be queried once every 15 seconds
+  type Query @rateLimit(limit: 1, duration: 15) {
     books: [Book!]
-
-    # Override behaviour imposed from 'Query' object on this field to have a custom limit
-    quote: String @rateLimit(limit: 1)
+    quote: String
   }
 
   type Book {
-    # For each 'Book' where this field is requested, rate limit
-    title: String @rateLimit(limit: 72000, duration: 3600)
-
-    # No limits are applied
+    title: String
     author: String
   }
 `;
-
 const resolvers = {
   Query: {
     books: () => [
@@ -39,22 +36,26 @@ const resolvers = {
   },
 };
 
-// Define custom key generator to log where rate limiting logic would be applied
-const logKeyGenerator = (directiveArgs, source, args, context, info) => {
-  console.log(
-    `${info.parentType}.${info.fieldName}: ${directiveArgs.limit}/${
-      directiveArgs.duration
-    }s`,
-  );
-  return `${info.parentType}.${info.fieldName}`;
-};
+// IMPORTANT: Create a client to provide into createRateLimitDirective
+const redisClient = redis.createClient({
+  url: process.env.REDIS_URL,
+  password: process.env.REDIS_PASSWORD,
+  enable_offline_queue: false, // must be created with offline queue switched off
+});
+redisClient.on('error', error => {
+  console.log(error);
+});
 
 const server = new ApolloServer({
   typeDefs: [createRateLimitTypeDef(), typeDefs],
   resolvers,
   schemaDirectives: {
     rateLimit: createRateLimitDirective({
-      keyGenerator: logKeyGenerator,
+      // IMPORTANT: Tell the directive's limiter to use RateLimiterRedis along with specific options
+      limiterClass: RateLimiterRedis,
+      limiterOptions: {
+        storeClient: redisClient,
+      },
     }),
   },
 });
