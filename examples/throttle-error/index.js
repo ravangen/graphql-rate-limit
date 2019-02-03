@@ -35,7 +35,7 @@ const resolvers = {
 
 class RateLimitError extends Error {
   constructor(msBeforeNextReset) {
-    super('Too many requests, please try again shortly');
+    super('Too many requests, please try again shortly.');
 
     // Determine when the rate limit will be reset so the client can try again
     const resetAt = new Date();

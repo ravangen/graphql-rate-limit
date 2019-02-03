@@ -57,10 +57,10 @@ Sample rate limited response:
       "path": ["quote"],
       "extensions": {
         "code": "RATE_LIMITED",
-        "reset": "2019-02-03T19:34:16.164Z",
+        "resetAt": "2019-02-03T19:34:16.164Z",
         "exception": {
           "stacktrace": [
-            "Error: Too many requests, please try again shortly",
+            "Error: Too many requests, please try again shortly.",
             "    at throttle (/Users/user/graphql-rate-limit/examples/throttle-error/index.js:57:9)",
             "    at Object.<anonymous> (/Users/user/graphql-rate-limit/examples/throttle-error/node_modules/graphql-rate-limit-directive/dist/index.js:106:28)",
             "    at Generator.throw (<anonymous>)",
@@ -71,7 +71,7 @@ Sample rate limited response:
       }
     },
     {
-      "message": "Too many requests, please try again shortly",
+      "message": "Too many requests, please try again shortly.",
       "locations": [
         {
           "line": 3,
@@ -81,7 +81,7 @@ Sample rate limited response:
       "path": ["books"],
       "extensions": {
         "code": "RATE_LIMITED",
-        "reset": "2019-02-03T19:34:16.163Z",
+        "resetAt": "2019-02-03T19:34:16.163Z",
         "exception": {
           "stacktrace": [
             "Error: Too many requests, please try again shortly",
