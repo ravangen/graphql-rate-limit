@@ -2,7 +2,7 @@
 
 [![CircleCI](https://img.shields.io/circleci/project/github/ravangen/graphql-rate-limit.svg?style=popout)](https://circleci.com/gh/ravangen/graphql-rate-limit) [![codecov](https://img.shields.io/codecov/c/github/ravangen/graphql-rate-limit.svg?style=popout)](https://codecov.io/gh/ravangen/graphql-rate-limit) [![npm version](https://img.shields.io/npm/v/graphql-rate-limit-directive.svg?style=popout)](https://www.npmjs.com/package/graphql-rate-limit-directive) [![npm downloads](https://img.shields.io/npm/dm/graphql-rate-limit-directive.svg?style=popout)](https://www.npmjs.com/package/graphql-rate-limit-directive)
 
-Basic **fixed window** rate limiting directive for GraphQL. Use to limit repeated requests to queries and mutations.
+Fixed window rate limiting directive for GraphQL. Use to limit repeated requests to queries and mutations.
 
 ## Features
 
@@ -131,7 +131,7 @@ A key is generated to identify each request for each field being rate limited. T
 
 By default, a rate limited field is identified by the key `${info.parentType}.${info.fieldName}`. This does _not_ provide user or client independent rate limiting. User A could consume all the capacity and starve out User B.
 
-Provide a customized `keyGenerator` to use `context` information to ensure user/client isolation. See [context example](examples/context/README.md) for isolating requests.
+Provide a customized `keyGenerator` to use `context` information to ensure user/client isolation. See [context example](examples/context/README.md).
 
 ### Target Objects and Fields
 
