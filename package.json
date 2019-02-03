@@ -33,7 +33,7 @@
     "tslint": "5.12.1",
     "tslint-config-prettier": "1.17.0",
     "tslint-config-standard": "8.0.1",
-    "typescript": "3.2.4"
+    "typescript": "3.3.1"
   },
   "homepage": "https://github.com/ravangen/graphql-rate-limit#readme",
   "author": "Robert Van Gennip <ravangen@gmail.com>",
