@@ -157,7 +157,7 @@ Provide a customized `keyGenerator` to use `context` information to ensure user/
 
 ### Throttle Behaviour
 
-Return a GraphQL error or object describing a limit was reached and when it will reset. See [error example](examples/throttle-error/README.md).
+Return a GraphQL error or object describing a limit was reached and when it will reset. See [error example](examples/throttle-error/README.md) and [object example](examples/throttle-object/README.md).
 
 ### Multiple Throttles
 
