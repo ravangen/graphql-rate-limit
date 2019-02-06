@@ -43,7 +43,7 @@ Sample query:
     }
     ... on RateLimit {
       limit
-      reset
+      resetAt
     }
   }
 }
