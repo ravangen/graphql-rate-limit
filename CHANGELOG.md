@@ -1,3 +1,7 @@
+## 0.1.0 – 2019-02-06
+
+- Include examples of how to use package
+
 ## 0.0.3 – 2019-01-27
 
 - Added test coverage
