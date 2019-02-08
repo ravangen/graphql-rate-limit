@@ -154,7 +154,7 @@ export function createRateLimitDirective<TContext>({
           ...limiterOptions,
           keyPrefix:
             limiterOptions.keyPrefix === undefined
-              ? this.name // change default behaviour which is to use 'rlflx'
+              ? this.name // change the default behaviour which is to use 'rlflx'
               : limiterOptions.keyPrefix,
           points: this.args.limit,
           duration: this.args.duration,
