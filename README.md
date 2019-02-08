@@ -62,7 +62,13 @@ type Query @rateLimit(limit: 60, duration: 60) {
 
 ### Example
 
-Additional, advanced examples are available in the [examples](examples) folder.
+Additional, advanced examples are available in the [examples](examples) folder:
+
+- [Context](examples/context/README.md): isolating operations between users
+- [Redis](examples/redis/README.md): share state in a distrubuted environment
+- [Multiple](examples/multiple/README.md): applying multiple rate limits on the same field
+- [Throttle throws error](examples/throttle-error/README.md): custom error raised
+- [Throttle returns object](examples/throttle-object/README.md): custom result instead of default resolution
 
 ```javascript
 const { ApolloServer, gql } = require('apollo-server');
@@ -123,7 +129,21 @@ server
   });
 ```
 
-## Configuration
+## Recommendations
+
+### Data Storage
+
+Supports [_Redis_](https://github.com/animir/node-rate-limiter-flexible/wiki/Redis), process [_Memory_](https://github.com/animir/node-rate-limiter-flexible/wiki/Memory), [_Cluster_](https://github.com/animir/node-rate-limiter-flexible/wiki/Cluster) or [_PM2_](https://github.com/animir/node-rate-limiter-flexible/wiki/PM2-cluster), [_Memcached_](https://github.com/animir/node-rate-limiter-flexible/wiki/Memcache), [_MongoDB_](https://github.com/animir/node-rate-limiter-flexible/wiki/Mongo), [_MySQL_](https://github.com/animir/node-rate-limiter-flexible/wiki/MySQL), [_PostgreSQL_](https://github.com/animir/node-rate-limiter-flexible/wiki/PostgreSQL) to control requests rate in single process or distributed environment. Storage options are provided by [`rate-limiter-flexible`](https://github.com/animir/node-rate-limiter-flexible).
+
+Memory store is the default but _not_ recommended for production as it does not share state with other servers or processes. See [Redis example](examples/redis/README.md) for use in a distributed environment.
+
+### Request Identification
+
+A key is generated to identify each request for each field being rate limited. To ensure isolation, the key is recommended to be unique per field.
+
+By default, a rate limited field is identified by the key `${info.parentType}.${info.fieldName}`. This does _not_ provide user or client independent rate limiting. User A could consume all the capacity and starve out User B.
+
+Provide a customized `keyGenerator` to use `context` information to ensure user/client isolation. See [context example](examples/context/README.md).
 
 ### Target Objects and Fields
 
@@ -141,58 +161,15 @@ type Query @rateLimit(limit: 30, duration: 60) {
 }
 ```
 
-### Data Storage
-
-Supports [_Redis_](https://github.com/animir/node-rate-limiter-flexible/wiki/Redis), process [_Memory_](https://github.com/animir/node-rate-limiter-flexible/wiki/Memory), [_Cluster_](https://github.com/animir/node-rate-limiter-flexible/wiki/Cluster) or [_PM2_](https://github.com/animir/node-rate-limiter-flexible/wiki/PM2-cluster), [_Memcached_](https://github.com/animir/node-rate-limiter-flexible/wiki/Memcache), [_MongoDB_](https://github.com/animir/node-rate-limiter-flexible/wiki/Mongo), [_MySQL_](https://github.com/animir/node-rate-limiter-flexible/wiki/MySQL), [_PostgreSQL_](https://github.com/animir/node-rate-limiter-flexible/wiki/PostgreSQL) to control requests rate in single process or distributed environment. Storage options are provided by [`rate-limiter-flexible`](https://github.com/animir/node-rate-limiter-flexible).
-
-Memory store is the default but _not_ recommended for production as it does not share state with other servers or processes. See [Redis example](examples/redis/README.md) for use in a distributed environment.
-
-### Request Identification
-
-A key is generated to identify each request for each field being rate limited. To ensure isolation, the key is recommended to be unique per field.
-
-By default, a rate limited field is identified by the key `${info.parentType}.${info.fieldName}`. This does _not_ provide user or client independent rate limiting. User A could consume all the capacity and starve out User B.
-
-Provide a customized `keyGenerator` to use `context` information to ensure user/client isolation. See [context example](examples/context/README.md).
-
 ### Throttle Behaviour
 
 Return a GraphQL error or object describing a limit was reached and when it will reset. See [error example](examples/throttle-error/README.md) and [object example](examples/throttle-object/README.md).
 
-### Multiple Throttles
+## API
 
-Multiple throttles can be used if you want to impose both burst throttling rates, and sustained throttling rates. For example, you might want to limit a user to a maximum of 60 requests per minute, and 1000 requests per day.
-
-Multiple schema directives can be created using different names and assigned to the same location.
-
-```typescript
-const schema = makeExecutableSchema({
-  typeDefs: [
-    createRateLimitTypeDef('burstRateLimit'),
-    createRateLimitTypeDef('sustainedRateLimit'),
-    typeDefs,
-  ],
-  resolvers,
-  schemaDirectives: {
-    burstRateLimit: createRateLimitDirective(),
-    sustainedRateLimit: createRateLimitDirective(),
-  },
-});
-```
-
-```graphql
-type Query {
-  books: [Book]
-    @burstRateLimit(limit: 10, duration: 60)
-    @sustainedRateLimit(limit: 200, period: 3600)
-}
-```
+### Coming Soon!
 
 **WARNING**: If providing the `keyPrefix` option to `createRateLimitDirective`, consider using directive's name as part of the prefix to ensure isolation between different directives.
-
-#### Unique Directives
-
-As of the June 2018 version of the GraphQL specification, [Directives Are Unique Per Location](https://facebook.github.io/graphql/June2018/#sec-Directives-Are-Unique-Per-Location). A spec [RFC to "Limit directive uniqueness to explicitly marked directives"](https://github.com/facebook/graphql/pull/472) is currently at [Stage 2: Draft](https://github.com/facebook/graphql/blob/master/CONTRIBUTING.md#stage-2-draft). As a result, multiple `@rateLimit` directives can not be defined on the same location.
 
 ## Contributions
 
