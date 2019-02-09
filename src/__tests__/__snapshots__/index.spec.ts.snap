@@ -91,7 +91,7 @@ Object {
           "description": Object {
             "block": true,
             "kind": "StringValue",
-            "value": "Quantity that is allowed per period.",
+            "value": "Number of occurrences allowed over duration.",
           },
           "directives": Array [],
           "kind": "InputValueDefinition",
@@ -156,7 +156,7 @@ Object {
   ],
   "kind": "Document",
   "loc": Object {
-    "end": 270,
+    "end": 278,
     "start": 0,
   },
 }

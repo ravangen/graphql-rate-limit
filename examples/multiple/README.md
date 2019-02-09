@@ -34,7 +34,7 @@ Navigate to [`http://localhost:4000/`](http://localhost:4000/) in a browser.
 
 #### Step 3: Execute GraphQL operations
 
-Server is configured to allow `books` to be queried once every 15 seconds and twice every 60 seconds. Sample query:
+Server is configured to allow `books` to be queried once every 15 seconds and three times every 60 seconds. Sample query:
 
 ```graphql
 {

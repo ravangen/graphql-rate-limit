@@ -14,8 +14,17 @@ import {
   RateLimiterRes,
 } from 'rate-limiter-flexible';
 
+/**
+ * Configure rate limit field behaviour.
+ */
 export interface RateLimitArgs {
+  /**
+   * Number of occurrences allowed over duration.
+   */
   limit: number;
+  /**
+   * Number of seconds before limit is reset.
+   */
   duration: number;
 }
 
@@ -36,10 +45,25 @@ export type RateLimitThrottle<TContext> = (
   info: GraphQLResolveInfo,
 ) => any;
 
+/**
+ * Configure rate limit behaviour.
+ */
 export interface IOptions<TContext> {
+  /**
+   * Constructs a key to represent an operation on a field.
+   */
   keyGenerator?: RateLimitKeyGenerator<TContext>;
+  /**
+   * Behaviour when limit is exceeded.
+   */
   throttle?: RateLimitThrottle<TContext>;
+  /**
+   * An implementation of a limiter.
+   */
   limiterClass?: typeof RateLimiterAbstract;
+  /**
+   * Configuration to apply to created limiters.
+   */
   limiterOptions?: Pick<
     IRateLimiterOptions,
     Exclude<
@@ -49,6 +73,10 @@ export interface IOptions<TContext> {
   >;
 }
 
+/**
+ * Create a GraphQL directive type definition.
+ * @param directiveName Name of the directive
+ */
 export function createRateLimitTypeDef(directiveName: string = 'rateLimit') {
   return gql`
   """
@@ -56,7 +84,7 @@ export function createRateLimitTypeDef(directiveName: string = 'rateLimit') {
   """
   directive @${directiveName}(
     """
-    Quantity that is allowed per period.
+    Number of occurrences allowed over duration.
     """
     limit: Int = 60
 
@@ -68,6 +96,9 @@ export function createRateLimitTypeDef(directiveName: string = 'rateLimit') {
 `;
 }
 
+/**
+ * Create an implementation of a rate limit directive.
+ */
 export function createRateLimitDirective<TContext>({
   keyGenerator = (
     directiveArgs: RateLimitArgs,
@@ -116,7 +147,7 @@ export function createRateLimitDirective<TContext>({
     //       limit: {
     //         type: GraphQLInt,
     //         defaultValue: 60,
-    //         description: 'Quantity that is allowed per period.',
+    //         description: 'Number of occurrences allowed over duration.',
     //       },
     //       duration: {
     //         type: GraphQLInt,
