@@ -129,23 +129,13 @@ server
   });
 ```
 
-## Recommendations
+## API
 
-### Data Storage
+### `createRateLimitTypeDef(directiveName?)`
 
-Supports [_Redis_](https://github.com/animir/node-rate-limiter-flexible/wiki/Redis), process [_Memory_](https://github.com/animir/node-rate-limiter-flexible/wiki/Memory), [_Cluster_](https://github.com/animir/node-rate-limiter-flexible/wiki/Cluster) or [_PM2_](https://github.com/animir/node-rate-limiter-flexible/wiki/PM2-cluster), [_Memcached_](https://github.com/animir/node-rate-limiter-flexible/wiki/Memcache), [_MongoDB_](https://github.com/animir/node-rate-limiter-flexible/wiki/Mongo), [_MySQL_](https://github.com/animir/node-rate-limiter-flexible/wiki/MySQL), [_PostgreSQL_](https://github.com/animir/node-rate-limiter-flexible/wiki/PostgreSQL) to control requests rate in single process or distributed environment. Storage options are provided by [`rate-limiter-flexible`](https://github.com/animir/node-rate-limiter-flexible).
+> Create a GraphQL directive type definition.
 
-Memory store is the default but _not_ recommended for production as it does not share state with other servers or processes. See [Redis example](examples/redis/README.md) for use in a distributed environment.
-
-### Request Identification
-
-A key is generated to identify each request for each field being rate limited. To ensure isolation, the key is recommended to be unique per field.
-
-By default, a rate limited field is identified by the key `${info.parentType}.${info.fieldName}`. This does _not_ provide user or client independent rate limiting. User A could consume all the capacity and starve out User B.
-
-Provide a customized `keyGenerator` to use `context` information to ensure user/client isolation. See [context example](examples/context/README.md).
-
-### Target Objects and Fields
+`graphql-js` >= 14 requires you to define your directives in your schema, before you attempt to use them. This generates the directive to be placed in your schema type definitions.
 
 Apply the directive to objects and fields. When applied to a object, it rate limits each of its fields. A rate limit on a field will override a limit imposed by its parent type.
 
@@ -161,13 +151,51 @@ type Query @rateLimit(limit: 30, duration: 60) {
 }
 ```
 
-### Throttle Behaviour
+#### `directiveName`
 
-Return a GraphQL error or object describing a limit was reached and when it will reset. See [error example](examples/throttle-error/README.md) and [object example](examples/throttle-object/README.md).
+Name of the directive to create.
 
-## API
+### `createRateLimitDirective(options?)`
 
-### Coming Soon!
+> Create an implementation of a rate limit directive.
+
+#### `options`
+
+> Configure rate limit behaviour.
+
+It is common to specify at least [`keyGenerator`](#keyGenerator) and [`limiterClass`](#limiterClass).
+
+##### `keyGenerator`
+
+> Constructs a key to represent an operation on a field.
+
+A key is generated to identify each request for each field being rate limited. To ensure isolation, the key is recommended to be unique per field.
+
+By default, a field is identified by the key `${info.parentType}.${info.fieldName}`. This does _not_ provide user or client independent rate limiting. User A could consume all the capacity and starve out User B.
+
+Use `context` information to ensure user/client isolation. See [context example](examples/context/README.md).
+
+##### `throttle`
+
+> Behaviour when limit is exceeded.
+
+By default, throws a `GraphQLError` with message `Too many requests, please try again in N seconds.`
+
+Can throw an error or return an object describing a reached limit and when it will reset. See [error example](examples/throttle-error/README.md) and [object example](examples/throttle-object/README.md).
+
+##### `limiterClass`
+
+> An implementation of a limiter.
+
+Storage implementations are provided by [`rate-limiter-flexible`](https://github.com/animir/node-rate-limiter-flexible).
+
+Supports [_Redis_](https://github.com/animir/node-rate-limiter-flexible/wiki/Redis), process [_Memory_](https://github.com/animir/node-rate-limiter-flexible/wiki/Memory), [_Cluster_](https://github.com/animir/node-rate-limiter-flexible/wiki/Cluster) or [_PM2_](https://github.com/animir/node-rate-limiter-flexible/wiki/PM2-cluster), [_Memcached_](https://github.com/animir/node-rate-limiter-flexible/wiki/Memcache), [_MongoDB_](https://github.com/animir/node-rate-limiter-flexible/wiki/Mongo), [_MySQL_](https://github.com/animir/node-rate-limiter-flexible/wiki/MySQL), [_PostgreSQL_](https://github.com/animir/node-rate-limiter-flexible/wiki/PostgreSQL) to control requests rate in single process or distributed environment.
+
+Memory store is the default but _not_ recommended for production as it does not share state with other servers or processes. See [Redis example](examples/redis/README.md) for use in a distributed environment.
+
+##### `limiterOptions`
+
+> Configuration to apply to created limiters.
 
 **WARNING**: If providing the `keyPrefix` option to `createRateLimitDirective`, consider using directive's name as part of the prefix to ensure isolation between different directives.
 
