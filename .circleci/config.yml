@@ -34,12 +34,14 @@ jobs:
 
       - run:
           name: Running tests
-          command: yarn run test --ci --coverage --reporters=default --reporters=jest-junit
+          command: |
+            mkdir -p /tmp/test-reports
+            yarn run test --ci --coverage --reporters=default --reporters=jest-junit
           environment:
-            - JEST_JUNIT_OUTPUT: test-reports/jest/junit.xml
+            - JEST_JUNIT_OUTPUT: /tmp/test-reports/jest/junit.xml
 
       - store_test_results:
-          path: test-results
+          path: /tmp/test-results
 
       - run:
           name: Running prettier
