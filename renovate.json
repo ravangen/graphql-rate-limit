@@ -1,4 +1,4 @@
 {
   "extends": ["config:js-lib"],
-  "schedule": "every weekend"
+  "schedule": "after 11am before 3pm on saturday"
 }
