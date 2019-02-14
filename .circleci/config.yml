@@ -44,6 +44,10 @@ jobs:
           path: /tmp/test-reports
 
       - run:
+          name: Uploading test coverage
+          command: bash <(curl -s https://codecov.io/bash) || echo 'Codecov failed to upload'
+
+      - run:
           name: Running prettier
           command: yarn run ci:lint:fmt
 
@@ -54,7 +58,3 @@ jobs:
       - run:
           name: Running typechecker
           command: yarn run tsc
-
-      - run:
-          name: Upload coverage
-          command: bash <(curl -s https://codecov.io/bash) || echo 'Codecov failed to upload'
