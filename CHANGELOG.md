@@ -1,3 +1,7 @@
+## 1.0.0 – 2019-02-17
+
+- Rename `throttle` to `onLimit` to better describe when function is run
+
 ## 0.1.0 – 2019-02-06
 
 - Include examples of how to use package
