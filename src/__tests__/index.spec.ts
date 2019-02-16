@@ -145,7 +145,7 @@ describe('createRateLimitDirective', () => {
     expect(consume).toHaveBeenCalledTimes(1);
     expect(consume).toHaveBeenCalledWith('Query.quote');
   });
-  it('throttles on limit reached', async () => {
+  it('uses default onLimit', async () => {
     consume
       .mockResolvedValueOnce({
         msBeforeNext: 250,
@@ -225,7 +225,7 @@ describe('createRateLimitDirective', () => {
     expect(consume).toHaveBeenCalledTimes(1);
     expect(consume).toHaveBeenCalledWith('127.0 0.1:Query.quote');
   });
-  it('respects custom throttle', async () => {
+  it('uses custom onLimit', async () => {
     const consumeResponse = {
       msBeforeNext: 1250,
       remainingPoints: 0,
@@ -238,7 +238,7 @@ describe('createRateLimitDirective', () => {
         quote: String @rateLimit(limit: 10, duration: 300)
       }
     `;
-    const throttle = (
+    const onLimit = (
       resource: RateLimiterRes,
       directiveArgs: RateLimitArgs,
       source: any,
@@ -256,7 +256,7 @@ describe('createRateLimitDirective', () => {
       resolvers,
       resolverValidationOptions,
       schemaDirectives: {
-        rateLimit: createRateLimitDirective({ throttle }),
+        rateLimit: createRateLimitDirective({ onLimit }),
       },
     });
 

@@ -58,7 +58,7 @@ Object {
 }
 `;
 
-exports[`createRateLimitDirective respects custom throttle 1`] = `
+exports[`createRateLimitDirective uses custom onLimit 1`] = `
 Object {
   "data": Object {
     "quote": "So comes snow after fire, and even dragons have their endings. ― Bilbo Baggins",
@@ -66,7 +66,7 @@ Object {
 }
 `;
 
-exports[`createRateLimitDirective throttles on limit reached 1`] = `
+exports[`createRateLimitDirective uses default onLimit 1`] = `
 Object {
   "data": Object {
     "firstQuote": "The future is something which everyone reaches at the rate of sixty minutes an hour, whatever he does, whoever he is. ― C.S. Lewis",
