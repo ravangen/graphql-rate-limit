@@ -67,8 +67,8 @@ Additional, advanced examples are available in the [examples](examples) folder:
 - [Context](examples/context/README.md): isolating operations between users
 - [Redis](examples/redis/README.md): share state in a distrubuted environment
 - [Multiple](examples/multiple/README.md): applying multiple rate limits on the same field
-- [Throttle throws error](examples/throttle-error/README.md): custom error raised
-- [Throttle returns object](examples/throttle-object/README.md): custom result instead of default resolution
+- [onLimit Error](examples/onlimit-error/README.md): custom error raised
+- [onLimit Object](examples/onlimit-object/README.md): custom result instead of default resolution
 
 ```javascript
 const { ApolloServer, gql } = require('apollo-server');
@@ -167,13 +167,13 @@ Memory store is the default but _not_ recommended for production as it does not 
 
 **WARNING**: If providing the `keyPrefix` option, consider using directive's name as part of the prefix to ensure isolation between different directives.
 
-##### `throttle`
+##### `onLimit`
 
 > Behaviour when limit is exceeded.
 
 By default, throws a `GraphQLError` with message `Too many requests, please try again in N seconds.`
 
-Can throw an error or return an object describing a reached limit and when it will reset. See [error example](examples/throttle-error/README.md) and [object example](examples/throttle-object/README.md).
+Can throw an error or return an object describing a reached limit and when it will reset. See [error example](examples/onlimit-error/README.md) and [object example](examples/onlimit-object/README.md).
 
 ### `createRateLimitTypeDef(directiveName?)`
 

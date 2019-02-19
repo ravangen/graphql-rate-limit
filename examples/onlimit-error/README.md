@@ -1,10 +1,10 @@
-# GraphQL Rate Limit - Error from Throttle
+# GraphQL Rate Limit - Throw error onLimit
 
 This example illustrates a custom error raised on rate limit exceeded.
 
 ## Overview
 
-Specify a `throttle` function. Throws a `RateLimitError` with contextual information.
+Specify a `onLimit` function. Throws a `RateLimitError` with contextual information.
 
 ## Setup
 
@@ -61,10 +61,10 @@ Sample rate limited response:
         "exception": {
           "stacktrace": [
             "Error: Too many requests, please try again shortly.",
-            "    at throttle (/Users/user/graphql-rate-limit/examples/throttle-error/index.js:57:9)",
-            "    at Object.<anonymous> (/Users/user/graphql-rate-limit/examples/throttle-error/node_modules/graphql-rate-limit-directive/dist/index.js:106:28)",
+            "    at onLimit (/Users/user/graphql-rate-limit/examples/onlimit-error/index.js:57:9)",
+            "    at Object.<anonymous> (/Users/user/graphql-rate-limit/examples/onlimit-error/node_modules/graphql-rate-limit-directive/dist/index.js:106:28)",
             "    at Generator.throw (<anonymous>)",
-            "    at rejected (/Users/user/graphql-rate-limit/examples/throttle-error/node_modules/graphql-rate-limit-directive/dist/index.js:5:65)",
+            "    at rejected (/Users/user/graphql-rate-limit/examples/onlimit-error/node_modules/graphql-rate-limit-directive/dist/index.js:5:65)",
             "    at process._tickCallback (internal/process/next_tick.js:68:7)"
           ]
         }
@@ -85,10 +85,10 @@ Sample rate limited response:
         "exception": {
           "stacktrace": [
             "Error: Too many requests, please try again shortly",
-            "    at throttle (/Users/user/graphql-rate-limit/examples/throttle-error/index.js:57:9)",
-            "    at Object.<anonymous> (/Users/user/graphql-rate-limit/examples/throttle-error/node_modules/graphql-rate-limit-directive/dist/index.js:106:28)",
+            "    at onLimit (/Users/user/graphql-rate-limit/examples/onlimit-error/index.js:57:9)",
+            "    at Object.<anonymous> (/Users/user/graphql-rate-limit/examples/onlimit-error/node_modules/graphql-rate-limit-directive/dist/index.js:106:28)",
             "    at Generator.throw (<anonymous>)",
-            "    at rejected (/Users/user/graphql-rate-limit/examples/throttle-error/node_modules/graphql-rate-limit-directive/dist/index.js:5:65)",
+            "    at rejected (/Users/user/graphql-rate-limit/examples/onlimit-error/node_modules/graphql-rate-limit-directive/dist/index.js:5:65)",
             "    at process._tickCallback (internal/process/next_tick.js:68:7)"
           ]
         }

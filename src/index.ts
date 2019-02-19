@@ -36,7 +36,7 @@ export type RateLimitKeyGenerator<TContext> = (
   info: GraphQLResolveInfo,
 ) => string;
 
-export type RateLimitThrottle<TContext> = (
+export type RateLimitOnLimit<TContext> = (
   resource: RateLimiterRes,
   directiveArgs: RateLimitArgs,
   source: any,
@@ -56,7 +56,7 @@ export interface IOptions<TContext> {
   /**
    * Behaviour when limit is exceeded.
    */
-  throttle?: RateLimitThrottle<TContext>;
+  onLimit?: RateLimitOnLimit<TContext>;
   /**
    * An implementation of a limiter.
    */
@@ -107,7 +107,7 @@ export function createRateLimitDirective<TContext>({
     context: TContext,
     info: GraphQLResolveInfo,
   ) => `${info.parentType}.${info.fieldName}`,
-  throttle = (
+  onLimit = (
     resource: RateLimiterRes,
     directiveArgs: RateLimitArgs,
     source: any,
@@ -208,7 +208,7 @@ export function createRateLimitDirective<TContext>({
           }
 
           const resource = e as RateLimiterRes;
-          return throttle(resource, this.args, source, args, context, info);
+          return onLimit(resource, this.args, source, args, context, info);
         }
         return resolve.apply(this, [source, args, context, info]);
       };

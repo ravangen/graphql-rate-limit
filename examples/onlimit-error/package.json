@@ -1,5 +1,5 @@
 {
-  "name": "throttle-object",
+  "name": "onlimit-error",
   "main": "index.js",
   "license": "MIT",
   "dependencies": {

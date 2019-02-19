@@ -1,10 +1,10 @@
-# GraphQL Rate Limit - Object from Throttle
+# GraphQL Rate Limit - Return object onLimit
 
 This example illustrates returning a different object instead of normal object type resolution on rate limit exceeded.
 
 ## Overview
 
-Inspired by [Where art thou, my error?](http://artsy.github.io/blog/2018/10/19/where-art-thou-my-error/), an Artsy Engineering Blog post, we can give exceptions their own type and return those instead of the success type, when they occur. The `throttle` function returns a `RateLimit` object with contextual information and that is part of the query's data in a union type.
+Inspired by [Where art thou, my error?](http://artsy.github.io/blog/2018/10/19/where-art-thou-my-error/), an Artsy Engineering Blog post, we can give exceptions their own type and return those instead of the success type, when they occur. The `onLimit` function returns a `RateLimit` object with contextual information and that is part of the query's data in a union type.
 
 **WARNING:** This approach only works on object types (not scalar types). See [Proposal: Support union scalar types](https://github.com/facebook/graphql/issues/215).
 
