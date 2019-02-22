@@ -1,3 +1,7 @@
+## 1.0.1 – 2019-02-22
+
+- Export `defaultKeyGenerator` and `defaultOnLimit`
+
 ## 1.0.0 – 2019-02-17
 
 - Rename `throttle` to `onLimit` to better describe when function is run
