@@ -2,6 +2,7 @@ const { ApolloServer, gql } = require('apollo-server');
 const {
   createRateLimitDirective,
   createRateLimitTypeDef,
+  defaultKeyGenerator,
 } = require('graphql-rate-limit-directive');
 
 const typeDefs = gql`
@@ -36,7 +37,13 @@ const resolvers = {
 // IMPORTANT: Specify how a rate limited field should determine uniqueness/isolation of operations
 // Uses the combination of user specific data (their ip) along the type and field being accessed
 const keyGenerator = (directiveArgs, obj, args, context, info) =>
-  `${context.ip}:${info.parentType}.${info.fieldName}`;
+  `${context.ip}:${defaultKeyGenerator(
+    directiveArgs,
+    obj,
+    args,
+    context,
+    info,
+  )}`;
 
 const server = new ApolloServer({
   typeDefs: [createRateLimitTypeDef(), typeDefs],

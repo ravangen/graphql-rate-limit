@@ -147,9 +147,7 @@ It is common to specify at least [`keyGenerator`](#keyGenerator) and [`limiterCl
 
 A key is generated to identify each request for each field being rate limited. To ensure isolation, the key is recommended to be unique per field.
 
-By default, a field is identified by the key `${info.parentType}.${info.fieldName}`. This does _not_ provide user or client independent rate limiting. User A could consume all the capacity and starve out User B.
-
-Use `context` information to ensure user/client isolation. See [context example](examples/context/README.md).
+By default, it does _not_ provide user or client independent rate limiting. See [`defaultKeyGenerator`](#defaultkeygeneratordirectiveargs-obj-args-context-info) and [context example](examples/context/README.md).
 
 ##### `limiterClass`
 
@@ -171,9 +169,7 @@ Memory store is the default but _not_ recommended for production as it does not 
 
 > Behaviour when limit is exceeded.
 
-By default, throws a `GraphQLError` with message `Too many requests, please try again in N seconds.`
-
-Can throw an error or return an object describing a reached limit and when it will reset. See [error example](examples/onlimit-error/README.md) and [object example](examples/onlimit-object/README.md).
+Throw an error or return an object describing a reached limit and when it will reset. Default is to throw an error using [`defaultOnLimit`](#defaultonlimitresource-directiveargs-obj-args-context-info). See [error example](examples/onlimit-error/README.md) and [object example](examples/onlimit-object/README.md).
 
 ### `createRateLimitTypeDef(directiveName?)`
 
@@ -198,6 +194,64 @@ type Query @rateLimit(limit: 30, duration: 60) {
 #### `directiveName`
 
 Name of the directive to create.
+
+### `defaultKeyGenerator(directiveArgs, obj, args, context, info)`
+
+> Get a value to uniquely identify a field in a schema.
+
+A field is identified by the key `${info.parentType}.${info.fieldName}`. This does _not_ provide user or client independent rate limiting. User A could consume all the capacity and starve out User B.
+
+This function can be used in conjunction with `context` information to ensure user/client isolation. See [context example](examples/context/README.md).
+
+#### `directiveArgs`
+
+The arguments defined in the schema for the directive.
+
+#### `obj`
+
+The previous result returned from the resolver on the parent field.
+
+#### `args`
+
+The arguments provided to the field in the GraphQL operation.
+
+#### `context`
+
+Contains per-request state shared by all resolvers in a particular operation.
+
+#### `info`
+
+Holds field-specific information relevant to the current operation as well as the schema details.
+
+### `defaultOnLimit(resource, directiveArgs, obj, args, context, info)`
+
+> Raise a rate limit error when there are too many requests.
+
+Throws a `GraphQLError` with message `Too many requests, please try again in N seconds.`
+
+#### `resource`
+
+The current rate limit information for this field.
+
+#### `directiveArgs`
+
+The arguments defined in the schema for the directive.
+
+#### `obj`
+
+The previous result returned from the resolver on the parent field.
+
+#### `args`
+
+The arguments provided to the field in the GraphQL operation.
+
+#### `context`
+
+Contains per-request state shared by all resolvers in a particular operation.
+
+#### `info`
+
+Holds field-specific information relevant to the current operation as well as the schema details.
 
 ## Contributions
 

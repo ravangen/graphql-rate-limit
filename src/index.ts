@@ -74,6 +74,48 @@ export interface IOptions<TContext> {
 }
 
 /**
+ * Get a value to uniquely identify a field in a schema.
+ * @param directiveArgs The arguments defined in the schema for the directive.
+ * @param obj The previous result returned from the resolver on the parent field.
+ * @param args The arguments provided to the field in the GraphQL operation.
+ * @param context Contains per-request state shared by all resolvers in a particular operation.
+ * @param info Holds field-specific information relevant to the current operation as well as the schema details.
+ */
+export function defaultKeyGenerator<TContext>(
+  directiveArgs: RateLimitArgs,
+  obj: any,
+  args: { [key: string]: any },
+  context: TContext,
+  info: GraphQLResolveInfo,
+): string {
+  return `${info.parentType}.${info.fieldName}`;
+}
+
+/**
+ * Raise a rate limit error when there are too many requests.
+ * @param resource The current rate limit information for this field.
+ * @param directiveArgs The arguments defined in the schema for the directive.
+ * @param obj The previous result returned from the resolver on the parent field.
+ * @param args The arguments provided to the field in the GraphQL operation.
+ * @param context Contains per-request state shared by all resolvers in a particular operation.
+ * @param info Holds field-specific information relevant to the current operation as well as the schema details.
+ */
+export function defaultOnLimit<TContext>(
+  resource: RateLimiterRes,
+  directiveArgs: RateLimitArgs,
+  obj: any,
+  args: { [key: string]: any },
+  context: TContext,
+  info: GraphQLResolveInfo,
+): any {
+  throw new GraphQLError(
+    `Too many requests, please try again in ${Math.ceil(
+      resource.msBeforeNext / 1000,
+    )} seconds.`,
+  );
+}
+
+/**
  * Create a GraphQL directive type definition.
  * @param directiveName Name of the directive
  */
@@ -100,27 +142,8 @@ export function createRateLimitTypeDef(directiveName: string = 'rateLimit') {
  * Create an implementation of a rate limit directive.
  */
 export function createRateLimitDirective<TContext>({
-  keyGenerator = (
-    directiveArgs: RateLimitArgs,
-    obj: any,
-    args: { [key: string]: any },
-    context: TContext,
-    info: GraphQLResolveInfo,
-  ) => `${info.parentType}.${info.fieldName}`,
-  onLimit = (
-    resource: RateLimiterRes,
-    directiveArgs: RateLimitArgs,
-    obj: any,
-    args: { [key: string]: any },
-    context: TContext,
-    info: GraphQLResolveInfo,
-  ): any => {
-    throw new GraphQLError(
-      `Too many requests, please try again in ${Math.ceil(
-        resource.msBeforeNext / 1000,
-      )} seconds.`,
-    );
-  },
+  keyGenerator = defaultKeyGenerator,
+  onLimit = defaultOnLimit,
   limiterClass = RateLimiterMemory,
   limiterOptions = {},
 }: IOptions<TContext> = {}): typeof SchemaDirectiveVisitor {
