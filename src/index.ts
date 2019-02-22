@@ -30,7 +30,7 @@ export interface RateLimitArgs {
 
 export type RateLimitKeyGenerator<TContext> = (
   directiveArgs: RateLimitArgs,
-  source: any,
+  obj: any,
   args: { [key: string]: any },
   context: TContext,
   info: GraphQLResolveInfo,
@@ -39,7 +39,7 @@ export type RateLimitKeyGenerator<TContext> = (
 export type RateLimitOnLimit<TContext> = (
   resource: RateLimiterRes,
   directiveArgs: RateLimitArgs,
-  source: any,
+  obj: any,
   args: { [key: string]: any },
   context: TContext,
   info: GraphQLResolveInfo,
@@ -102,7 +102,7 @@ export function createRateLimitTypeDef(directiveName: string = 'rateLimit') {
 export function createRateLimitDirective<TContext>({
   keyGenerator = (
     directiveArgs: RateLimitArgs,
-    source: any,
+    obj: any,
     args: { [key: string]: any },
     context: TContext,
     info: GraphQLResolveInfo,
@@ -110,7 +110,7 @@ export function createRateLimitDirective<TContext>({
   onLimit = (
     resource: RateLimiterRes,
     directiveArgs: RateLimitArgs,
-    source: any,
+    obj: any,
     args: { [key: string]: any },
     context: TContext,
     info: GraphQLResolveInfo,
@@ -198,8 +198,8 @@ export function createRateLimitDirective<TContext>({
     private rateLimit(field: GraphQLField<any, TContext>) {
       const { resolve = defaultFieldResolver } = field;
       const limiter = this.getLimiter();
-      field.resolve = async (source, args, context, info) => {
-        const key = keyGenerator(this.args, source, args, context, info);
+      field.resolve = async (obj, args, context, info) => {
+        const key = keyGenerator(this.args, obj, args, context, info);
         try {
           await limiter.consume(key);
         } catch (e) {
@@ -208,9 +208,9 @@ export function createRateLimitDirective<TContext>({
           }
 
           const resource = e as RateLimiterRes;
-          return onLimit(resource, this.args, source, args, context, info);
+          return onLimit(resource, this.args, obj, args, context, info);
         }
-        return resolve.apply(this, [source, args, context, info]);
+        return resolve.apply(this, [obj, args, context, info]);
       };
     }
   };

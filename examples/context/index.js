@@ -35,7 +35,7 @@ const resolvers = {
 
 // IMPORTANT: Specify how a rate limited field should determine uniqueness/isolation of operations
 // Uses the combination of user specific data (their ip) along the type and field being accessed
-const keyGenerator = (directiveArgs, source, args, context, info) =>
+const keyGenerator = (directiveArgs, obj, args, context, info) =>
   `${context.ip}:${info.parentType}.${info.fieldName}`;
 
 const server = new ApolloServer({

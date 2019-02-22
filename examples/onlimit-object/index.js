@@ -55,7 +55,7 @@ class RateLimit {
 }
 
 // IMPORTANT: Specify how a rate limited field should behave when a limit has been exceeded
-const onLimit = (resource, directiveArgs, source, args, context, info) =>
+const onLimit = (resource, directiveArgs, obj, args, context, info) =>
   new RateLimit(directiveArgs.limit, resource.msBeforeNext);
 
 const server = new ApolloServer({

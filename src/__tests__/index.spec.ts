@@ -196,7 +196,7 @@ describe('createRateLimitDirective', () => {
     };
     const keyGenerator = (
       directiveArgs: RateLimitArgs,
-      source: any,
+      obj: any,
       args: { [key: string]: any },
       context: IContext,
       info: GraphQLResolveInfo,
@@ -241,7 +241,7 @@ describe('createRateLimitDirective', () => {
     const onLimit = (
       resource: RateLimiterRes,
       directiveArgs: RateLimitArgs,
-      source: any,
+      obj: any,
       args: { [key: string]: any },
       context: object,
       info: GraphQLResolveInfo,

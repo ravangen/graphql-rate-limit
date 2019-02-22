@@ -51,7 +51,7 @@ class RateLimitError extends Error {
 }
 
 // IMPORTANT: Specify how a rate limited field should behave when a limit has been exceeded
-const onLimit = (resource, directiveArgs, source, args, context, info) => {
+const onLimit = (resource, directiveArgs, obj, args, context, info) => {
   throw new RateLimitError(resource.msBeforeNext);
 };
 
