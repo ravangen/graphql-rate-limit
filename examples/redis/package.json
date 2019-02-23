@@ -5,7 +5,7 @@
   "dependencies": {
     "apollo-server": "2.3.3",
     "dotenv": "6.2.0",
-    "graphql-rate-limit-directive": "../../",
+    "graphql-rate-limit-directive": "../../dist",
     "rate-limiter-flexible": "0.22.1",
     "redis": "2.8.0"
   }
