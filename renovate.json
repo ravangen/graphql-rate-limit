@@ -1,4 +1,18 @@
 {
-  "extends": ["config:js-lib"],
+  "extends": ["config:base"],
+  "packageRules": [
+    {
+      "packagePatterns": ["*"],
+      "rangeStrategy": "update-lockfile"
+    },
+    {
+      "depTypeList": ["devDependencies"],
+      "rangeStrategy": "pin"
+    },
+    {
+      "depTypeList": ["peerDependencies"],
+      "rangeStrategy": "widen"
+    }
+  ],
   "schedule": "after 11am before 3pm on saturday"
 }
