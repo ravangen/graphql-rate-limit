@@ -152,13 +152,13 @@ describe('createRateLimitDirective', () => {
         remainingPoints: 0,
         consumedPoints: 1,
         isFirstInDuration: true,
-      })
+      } as RateLimiterRes)
       .mockRejectedValue({
         msBeforeNext: 250,
         remainingPoints: 0,
         consumedPoints: 1,
         isFirstInDuration: false,
-      });
+      } as RateLimiterRes);
     const typeDefs = gql`
       type Query {
         quote: String @rateLimit(limit: 1)
@@ -231,7 +231,7 @@ describe('createRateLimitDirective', () => {
       remainingPoints: 0,
       consumedPoints: 10,
       isFirstInDuration: false,
-    };
+    } as RateLimiterRes;
     consume.mockRejectedValue(consumeResponse);
     const typeDefs = gql`
       type Query {
