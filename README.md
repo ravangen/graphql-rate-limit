@@ -7,9 +7,9 @@ Fixed window rate limiting directive for GraphQL. Use to limit repeated requests
 ## Features
 
 - 👨‍💻 **Identification**: Distinguish requests using resolver data
-- 🎯 **Per-Object or Per-Field**: Limit by objects and specific fields
-- 📦 **Storage**: Supports multiple data store choices
-- ♾️ **Throttles**: Define any number of limits per field
+- 🎯 [**Per-Object or Per-Field**](#step-3-attach-directive-to-field-or-object): Limit by objects and specific fields
+- 📦 [**Storage**](#limiterclass): Supports multiple data store choices (_Redis_, process _Memory_, ...)
+- ♾️ [**Throttles**](examples/multiple/README.md): Define any number of limits per field
 - 😍 **TypeScript**: Written in and exports type definitions
 
 ## Install
@@ -57,6 +57,22 @@ Attach `@rateLimit` directive. Argument `limit` is number of allow operations pe
 # Allow at most 60 queries per field within a minute
 type Query @rateLimit(limit: 60, duration: 60) {
   ...
+}
+```
+
+#### Overrides
+
+When the directive is applied to a object, it rate limits each of its fields. A rate limit on a field will override a limit imposed by its parent type.
+
+```graphql
+# Apply default rate limiting to all fields of 'Query'
+type Query @rateLimit(limit: 60, duration: 60) {
+  books: [Book!]
+
+  authors: [Author!]
+
+  # Override behaviour imposed from 'Query' object on this field to have different limit
+  quote: String @rateLimit(limit: 1, duration: 60)
 }
 ```
 
@@ -176,20 +192,6 @@ Throw an error or return an object describing a reached limit and when it will r
 > Create a GraphQL directive type definition.
 
 `graphql-js` >= 14 requires you to define your directives in your schema, before you attempt to use them. This generates the directive to be placed in your schema type definitions.
-
-Apply the directive to objects and fields. When applied to a object, it rate limits each of its fields. A rate limit on a field will override a limit imposed by its parent type.
-
-```graphql
-# Apply default rate limiting to all fields of 'Query'
-type Query @rateLimit(limit: 30, duration: 60) {
-  books: [Book!]
-
-  authors: [Author!]
-
-  # Override behaviour imposed from 'Query' object on this field to have different limit
-  quote: String @rateLimit(limit: 1, duration: 60)
-}
-```
 
 #### `directiveName`
 
