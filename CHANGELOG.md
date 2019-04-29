@@ -1,3 +1,8 @@
+## 1.0.2 – 2019-04-28
+
+- Update dependencies
+- Improve documentation
+
 ## 1.0.1 – 2019-02-22
 
 - Export `defaultKeyGenerator` and `defaultOnLimit`

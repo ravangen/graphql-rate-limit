@@ -3011,10 +3011,10 @@ qs@~6.5.2:
   resolved "https://registry.yarnpkg.com/qs/-/qs-6.5.2.tgz#cb3ae806e8740444584ef154ce8ee98d403f3e36"
   integrity sha512-N5ZAX4/LxJmF+7wN74pUD6qAh9/wnvdQcjq9TZjevvXzSUo7bfmw91saqMjzGS2xq91/odN2dW/WOl7qQHNDGA==
 
-rate-limiter-flexible@^0.22.0:
-  version "0.22.0"
-  resolved "https://registry.yarnpkg.com/rate-limiter-flexible/-/rate-limiter-flexible-0.22.0.tgz#0e60bfbcb9ac1bc12cf44cd6b44a50ef64321560"
-  integrity sha512-PQrLM3XZNiudoAr0zqppW10LipKgwiZ3vP84zMVu6kl1OodO/4dVO2cir4UpAKWBoVZ5DFAP9rYBLHHnUZnWNw==
+"rate-limiter-flexible@0.22.0 - 1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/rate-limiter-flexible/-/rate-limiter-flexible-1.0.1.tgz#8404bdd4293d65b14a49fcf4bd0095324ba181f1"
+  integrity sha512-QGWNJJ7ljysg86dPSee4YaPSUNmw5xm0kXq4FRDnC26v6AcUMlepOf5oSuGzyo30ZPG8A/JUjegjCRjfoxCiUg==
 
 rc@^1.2.7:
   version "1.2.8"
