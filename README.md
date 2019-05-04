@@ -161,9 +161,11 @@ It is common to specify at least [`keyGenerator`](#keyGenerator) and [`limiterCl
 
 > Constructs a key to represent an operation on a field.
 
-A key is generated to identify each request for each field being rate limited. To ensure isolation, the key is recommended to be unique per field.
+A key is generated to identify each request for each field being rate limited. To ensure isolation, the key is recommended to be unique per field. Supports both synchronous and asynchronous functions.
 
 By default, it does _not_ provide user or client independent rate limiting. See [`defaultKeyGenerator`](#defaultkeygeneratordirectiveargs-obj-args-context-info) and [context example](examples/context/README.md).
+
+**WARNING**: Inside a generator function, consider accessing the GraphQL `context` or memoizing any expensive calls (HTTP, database, ...) as the functions is run for each rate limited field.
 
 ##### `limiterClass`
 

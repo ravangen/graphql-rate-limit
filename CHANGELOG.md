@@ -1,3 +1,7 @@
+## 1.1.0 – 2019-05-04
+
+- Support for async `keyGenerator`
+
 ## 1.0.2 – 2019-04-28
 
 - Update dependencies

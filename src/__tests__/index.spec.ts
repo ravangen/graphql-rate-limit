@@ -182,7 +182,7 @@ describe('createRateLimitDirective', () => {
     expect(consume).toHaveBeenCalledTimes(2);
     expect(consume).toHaveBeenCalledWith('Query.quote');
   });
-  it('respects custom key generator', async () => {
+  it('respects custom async key generator', async () => {
     const typeDefs = gql`
       type Query {
         quote: String @rateLimit(limit: 10, duration: 300)
@@ -203,7 +203,10 @@ describe('createRateLimitDirective', () => {
     ) => {
       expect(directiveArgs.limit).toBe(10);
       expect(directiveArgs.duration).toBe(300);
-      return `${context.ip}:${info.parentType}.${info.fieldName}`;
+      // This could be sync, but that case is widely tested already so force this to return a Promise
+      return Promise.resolve(
+        `${context.ip}:${info.parentType}.${info.fieldName}`,
+      );
     };
     const schema = makeExecutableSchema({
       typeDefs: [createRateLimitTypeDef(), typeDefs],

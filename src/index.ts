@@ -34,7 +34,7 @@ export type RateLimitKeyGenerator<TContext> = (
   args: { [key: string]: any },
   context: TContext,
   info: GraphQLResolveInfo,
-) => string;
+) => Promise<string> | string;
 
 export type RateLimitOnLimit<TContext> = (
   resource: RateLimiterRes,
@@ -222,7 +222,7 @@ export function createRateLimitDirective<TContext>({
       const { resolve = defaultFieldResolver } = field;
       const limiter = this.getLimiter();
       field.resolve = async (obj, args, context, info) => {
-        const key = keyGenerator(this.args, obj, args, context, info);
+        const key = await keyGenerator(this.args, obj, args, context, info);
         try {
           await limiter.consume(key);
         } catch (e) {
