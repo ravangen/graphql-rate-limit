@@ -2957,9 +2957,9 @@ qs@~6.5.2:
   integrity sha512-N5ZAX4/LxJmF+7wN74pUD6qAh9/wnvdQcjq9TZjevvXzSUo7bfmw91saqMjzGS2xq91/odN2dW/WOl7qQHNDGA==
 
 "rate-limiter-flexible@0.22.0 - 1":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/rate-limiter-flexible/-/rate-limiter-flexible-1.0.2.tgz#d4fd25e0a3663e02a8df353f249fb59d103072a2"
-  integrity sha512-me2BdoTUUnNt3uF/gjcZ89t/x6sx/V5ui612ajjbGNSW0CW37S2PteN5zVP6p7eDbFm9CK9CthtxAwWi4hdRvA==
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/rate-limiter-flexible/-/rate-limiter-flexible-1.1.1.tgz#e9b91aa191fab844d3a93094e23e03beae35c135"
+  integrity sha512-A3obd7RrHb8XGW78DGurPgFD7gi+MMDG4AKS+ipdo0dNSMWLStKMgc9pRE0m1VEFLb+R7ce9SWkiS7VgrH4x8A==
 
 rc@^1.2.7:
   version "1.2.8"
