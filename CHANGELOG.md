@@ -2,6 +2,7 @@
 
 - Add `pointsCalculator` option to dynamically calculate how many points to consume
 - Update `createRateLimitTypeDef` to have non-nullable `limit` and `duration` arguments
+- Update dependencies
 
 ## 1.1.0 – 2019-05-04
 
