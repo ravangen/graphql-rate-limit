@@ -69,7 +69,7 @@ describe('createRateLimitDirective', () => {
 
     expect(response).toMatchSnapshot();
     expect(consume).toHaveBeenCalledTimes(1);
-    expect(consume).toHaveBeenCalledWith('Query.quote');
+    expect(consume).toHaveBeenCalledWith('Query.quote', 1);
   });
   it('limits a repeated field', async () => {
     const typeDefs = gql`
@@ -93,7 +93,7 @@ describe('createRateLimitDirective', () => {
 
     expect(response).toMatchSnapshot();
     expect(consume).toHaveBeenCalledTimes(2);
-    expect(consume).toHaveBeenCalledWith('Book.title');
+    expect(consume).toHaveBeenCalledWith('Book.title', 1);
   });
   it('limits an object', async () => {
     const typeDefs = gql`
@@ -118,8 +118,8 @@ describe('createRateLimitDirective', () => {
 
     expect(response).toMatchSnapshot();
     expect(consume).toHaveBeenCalledTimes(2);
-    expect(consume).toHaveBeenCalledWith('Query.quote');
-    expect(consume).toHaveBeenCalledWith('Query.books');
+    expect(consume).toHaveBeenCalledWith('Query.quote', 1);
+    expect(consume).toHaveBeenCalledWith('Query.books', 1);
   });
   it('raises limiter error', async () => {
     consume.mockImplementation(() => {
@@ -143,7 +143,7 @@ describe('createRateLimitDirective', () => {
 
     expect(response).toMatchSnapshot();
     expect(consume).toHaveBeenCalledTimes(1);
-    expect(consume).toHaveBeenCalledWith('Query.quote');
+    expect(consume).toHaveBeenCalledWith('Query.quote', 1);
   });
   it('uses default onLimit', async () => {
     consume
@@ -180,7 +180,7 @@ describe('createRateLimitDirective', () => {
 
     expect(response).toMatchSnapshot();
     expect(consume).toHaveBeenCalledTimes(2);
-    expect(consume).toHaveBeenCalledWith('Query.quote');
+    expect(consume).toHaveBeenCalledWith('Query.quote', 1);
   });
   it('respects custom async key generator', async () => {
     const typeDefs = gql`
@@ -226,7 +226,7 @@ describe('createRateLimitDirective', () => {
 
     expect(response).toMatchSnapshot();
     expect(consume).toHaveBeenCalledTimes(1);
-    expect(consume).toHaveBeenCalledWith('127.0 0.1:Query.quote');
+    expect(consume).toHaveBeenCalledWith('127.0 0.1:Query.quote', 1);
   });
   it('uses custom onLimit', async () => {
     const consumeResponse = {
@@ -267,7 +267,66 @@ describe('createRateLimitDirective', () => {
 
     expect(response).toMatchSnapshot();
     expect(consume).toHaveBeenCalledTimes(1);
-    expect(consume).toHaveBeenCalledWith('Query.quote');
+    expect(consume).toHaveBeenCalledWith('Query.quote', 1);
+  });
+  it('uses custom pointsCalculator', async () => {
+    const typeDefs = gql`
+      type Query {
+        quote: String @rateLimit(limit: 10, duration: 300)
+      }
+    `;
+    const pointsCalculator = (
+      directiveArgs: RateLimitArgs,
+      obj: any,
+      args: { [key: string]: any },
+      context: object,
+      info: GraphQLResolveInfo,
+    ) => {
+      return 2;
+    };
+    const schema = makeExecutableSchema({
+      typeDefs: [createRateLimitTypeDef(), typeDefs],
+      resolvers,
+      resolverValidationOptions,
+      schemaDirectives: {
+        rateLimit: createRateLimitDirective({ pointsCalculator }),
+      },
+    });
+
+    const response = await graphql(schema, 'query { quote }');
+
+    expect(response).toMatchSnapshot();
+    expect(consume).toHaveBeenCalledTimes(1);
+    expect(consume).toHaveBeenCalledWith('Query.quote', 2);
+  });
+  it('skips consume on zero points', async () => {
+    const typeDefs = gql`
+      type Query {
+        quote: String @rateLimit(limit: 10, duration: 300)
+      }
+    `;
+    const pointsCalculator = (
+      directiveArgs: RateLimitArgs,
+      obj: any,
+      args: { [key: string]: any },
+      context: object,
+      info: GraphQLResolveInfo,
+    ) => {
+      return 0;
+    };
+    const schema = makeExecutableSchema({
+      typeDefs: [createRateLimitTypeDef(), typeDefs],
+      resolvers,
+      resolverValidationOptions,
+      schemaDirectives: {
+        rateLimit: createRateLimitDirective({ pointsCalculator }),
+      },
+    });
+
+    const response = await graphql(schema, 'query { quote }');
+
+    expect(response).toMatchSnapshot();
+    expect(consume).not.toHaveBeenCalled();
   });
   it('respects custom limiter keyPrefix option', async () => {
     const keyPrefix = 'custom';

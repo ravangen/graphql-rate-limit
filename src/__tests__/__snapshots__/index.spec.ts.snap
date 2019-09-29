@@ -58,10 +58,26 @@ Object {
 }
 `;
 
+exports[`createRateLimitDirective skips consume on zero points 1`] = `
+Object {
+  "data": Object {
+    "quote": "The future is something which everyone reaches at the rate of sixty minutes an hour, whatever he does, whoever he is. ― C.S. Lewis",
+  },
+}
+`;
+
 exports[`createRateLimitDirective uses custom onLimit 1`] = `
 Object {
   "data": Object {
     "quote": "So comes snow after fire, and even dragons have their endings. ― Bilbo Baggins",
+  },
+}
+`;
+
+exports[`createRateLimitDirective uses custom pointsCalculator 1`] = `
+Object {
+  "data": Object {
+    "quote": "The future is something which everyone reaches at the rate of sixty minutes an hour, whatever he does, whoever he is. ― C.S. Lewis",
   },
 }
 `;
@@ -100,10 +116,13 @@ Object {
             "value": "limit",
           },
           "type": Object {
-            "kind": "NamedType",
-            "name": Object {
-              "kind": "Name",
-              "value": "Int",
+            "kind": "NonNullType",
+            "type": Object {
+              "kind": "NamedType",
+              "name": Object {
+                "kind": "Name",
+                "value": "Int",
+              },
             },
           },
         },
@@ -124,10 +143,13 @@ Object {
             "value": "duration",
           },
           "type": Object {
-            "kind": "NamedType",
-            "name": Object {
-              "kind": "Name",
-              "value": "Int",
+            "kind": "NonNullType",
+            "type": Object {
+              "kind": "NamedType",
+              "name": Object {
+                "kind": "Name",
+                "value": "Int",
+              },
             },
           },
         },
@@ -156,7 +178,7 @@ Object {
   ],
   "kind": "Document",
   "loc": Object {
-    "end": 278,
+    "end": 280,
     "start": 0,
   },
 }

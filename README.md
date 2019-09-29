@@ -81,6 +81,7 @@ type Query @rateLimit(limit: 60, duration: 60) {
 Additional, advanced examples are available in the [examples](examples) folder:
 
 - [Context](examples/context/README.md): isolating operations between users
+- [Points](examples/points/README.md): customize the cost of a field resolution
 - [Redis](examples/redis/README.md): share state in a distrubuted environment
 - [Multiple](examples/multiple/README.md): applying multiple rate limits on the same field
 - [onLimit Error](examples/onlimit-error/README.md): custom error raised
@@ -183,6 +184,16 @@ Memory store is the default but _not_ recommended for production as it does not 
 
 **WARNING**: If providing the `keyPrefix` option, consider using directive's name as part of the prefix to ensure isolation between different directives.
 
+##### `pointsCalculator`
+
+> Calculate the number of points to consume.
+
+Default with [`defaultPointsCalculator`](#defaultpointscalculatordirectiveargs-obj-args-context-info) is to cost one point.
+
+- A positve number reduces the remaining points for consumption for one duration.
+- A zero skips consuming points (like a whitelist).
+- A negative number increases the available points for consumption for one duration.
+
 ##### `onLimit`
 
 > Behaviour when limit is exceeded.
@@ -206,6 +217,32 @@ Name of the directive to create.
 A field is identified by the key `${info.parentType}.${info.fieldName}`. This does _not_ provide user or client independent rate limiting. User A could consume all the capacity and starve out User B.
 
 This function can be used in conjunction with `context` information to ensure user/client isolation. See [context example](examples/context/README.md).
+
+#### `directiveArgs`
+
+The arguments defined in the schema for the directive.
+
+#### `obj`
+
+The previous result returned from the resolver on the parent field.
+
+#### `args`
+
+The arguments provided to the field in the GraphQL operation.
+
+#### `context`
+
+Contains per-request state shared by all resolvers in a particular operation.
+
+#### `info`
+
+Holds field-specific information relevant to the current operation as well as the schema details.
+
+### `defaultPointsCalculator(directiveArgs, obj, args, context, info)`
+
+> Calculate the number of points to consume.
+
+Cost one point.
 
 #### `directiveArgs`
 

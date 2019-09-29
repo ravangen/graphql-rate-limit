@@ -36,6 +36,14 @@ export type RateLimitKeyGenerator<TContext> = (
   info: GraphQLResolveInfo,
 ) => Promise<string> | string;
 
+export type RateLimitPointsCalculator<TContext> = (
+  directiveArgs: RateLimitArgs,
+  obj: any,
+  args: { [key: string]: any },
+  context: TContext,
+  info: GraphQLResolveInfo,
+) => Promise<number> | number;
+
 export type RateLimitOnLimit<TContext> = (
   resource: RateLimiterRes,
   directiveArgs: RateLimitArgs,
@@ -53,6 +61,10 @@ export interface IOptions<TContext> {
    * Constructs a key to represent an operation on a field.
    */
   keyGenerator?: RateLimitKeyGenerator<TContext>;
+  /**
+   * Calculate the number of points to consume.
+   */
+  pointsCalculator?: RateLimitPointsCalculator<TContext>;
   /**
    * Behaviour when limit is exceeded.
    */
@@ -88,7 +100,25 @@ export function defaultKeyGenerator<TContext>(
   context: TContext,
   info: GraphQLResolveInfo,
 ): string {
-  return `${info.parentType}.${info.fieldName}`;
+  return `${info.parentType.name}.${info.fieldName}`;
+}
+
+/**
+ * Calculate the number of points to consume.
+ * @param directiveArgs The arguments defined in the schema for the directive.
+ * @param obj The previous result returned from the resolver on the parent field.
+ * @param args The arguments provided to the field in the GraphQL operation.
+ * @param context Contains per-request state shared by all resolvers in a particular operation.
+ * @param info Holds field-specific information relevant to the current operation as well as the schema details.
+ */
+export function defaultPointsCalculator<TContext>(
+  directiveArgs: RateLimitArgs,
+  obj: any,
+  args: { [key: string]: any },
+  context: TContext,
+  info: GraphQLResolveInfo,
+): number {
+  return 1;
 }
 
 /**
@@ -128,12 +158,12 @@ export function createRateLimitTypeDef(directiveName: string = 'rateLimit') {
     """
     Number of occurrences allowed over duration.
     """
-    limit: Int = 60
+    limit: Int! = 60
 
     """
     Number of seconds before limit is reset.
     """
-    duration: Int = 60
+    duration: Int! = 60
   ) on OBJECT | FIELD_DEFINITION
 `;
 }
@@ -143,6 +173,7 @@ export function createRateLimitTypeDef(directiveName: string = 'rateLimit') {
  */
 export function createRateLimitDirective<TContext>({
   keyGenerator = defaultKeyGenerator,
+  pointsCalculator = defaultPointsCalculator,
   onLimit = defaultOnLimit,
   limiterClass = RateLimiterMemory,
   limiterOptions = {},
@@ -168,12 +199,12 @@ export function createRateLimitDirective<TContext>({
     //     ],
     //     args: {
     //       limit: {
-    //         type: GraphQLInt,
+    //         type: GraphQLNonNull(GraphQLInt),
     //         defaultValue: 60,
     //         description: 'Number of occurrences allowed over duration.',
     //       },
     //       duration: {
-    //         type: GraphQLInt,
+    //         type: GraphQLNonNull(GraphQLInt),
     //         defaultValue: 60,
     //         description: 'Number of seconds before limit is reset.',
     //       },
@@ -222,16 +253,25 @@ export function createRateLimitDirective<TContext>({
       const { resolve = defaultFieldResolver } = field;
       const limiter = this.getLimiter();
       field.resolve = async (obj, args, context, info) => {
-        const key = await keyGenerator(this.args, obj, args, context, info);
-        try {
-          await limiter.consume(key);
-        } catch (e) {
-          if (e instanceof Error) {
-            throw e;
-          }
+        const pointsToConsume = await pointsCalculator(
+          this.args,
+          obj,
+          args,
+          context,
+          info,
+        );
+        if (pointsToConsume !== 0) {
+          const key = await keyGenerator(this.args, obj, args, context, info);
+          try {
+            await limiter.consume(key, pointsToConsume);
+          } catch (e) {
+            if (e instanceof Error) {
+              throw e;
+            }
 
-          const resource = e as RateLimiterRes;
-          return onLimit(resource, this.args, obj, args, context, info);
+            const resource = e as RateLimiterRes;
+            return onLimit(resource, this.args, obj, args, context, info);
+          }
         }
         return resolve.apply(this, [obj, args, context, info]);
       };

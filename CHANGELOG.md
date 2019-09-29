@@ -1,3 +1,8 @@
+## 1.2.0 – 2019-09-29
+
+- Add `pointsCalculator` option to dynamically calculate how many points to consume
+- Update `createRateLimitTypeDef` to have non-nullable `limit` and `duration` arguments
+
 ## 1.1.0 – 2019-05-04
 
 - Support for async `keyGenerator`

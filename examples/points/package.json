@@ -1,0 +1,10 @@
+{
+  "name": "points",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "apollo-server": "2.3.3",
+    "graphql-rate-limit-directive": "../../dist",
+    "rate-limiter-flexible": "0.22.1"
+  }
+}
