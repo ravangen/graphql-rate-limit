@@ -1,6 +1,11 @@
 # GraphQL Rate Limit
 
-[![CircleCI](https://img.shields.io/circleci/project/github/ravangen/graphql-rate-limit/master.svg?style=popout)](https://circleci.com/gh/ravangen/graphql-rate-limit) [![codecov](https://img.shields.io/codecov/c/github/ravangen/graphql-rate-limit.svg?style=popout)](https://codecov.io/gh/ravangen/graphql-rate-limit) [![npm version](https://img.shields.io/npm/v/graphql-rate-limit-directive.svg?style=popout)](https://www.npmjs.com/package/graphql-rate-limit-directive) [![npm downloads](https://img.shields.io/npm/dm/graphql-rate-limit-directive.svg?style=popout)](https://www.npmjs.com/package/graphql-rate-limit-directive)
+[![CircleCI](https://img.shields.io/circleci/project/github/ravangen/graphql-rate-limit/master.svg?style=popout)](https://circleci.com/gh/ravangen/graphql-rate-limit)
+[![Codecov](https://img.shields.io/codecov/c/github/ravangen/graphql-rate-limit.svg?style=popout)](https://codecov.io/gh/ravangen/graphql-rate-limit)
+[![npm Version](https://img.shields.io/npm/v/graphql-rate-limit-directive.svg?style=popout)](https://www.npmjs.com/package/graphql-rate-limit-directive)
+[![npm Downloads](https://img.shields.io/npm/dm/graphql-rate-limit-directive.svg?style=popout)](https://www.npmjs.com/package/graphql-rate-limit-directive)
+[![Dependency Status](https://david-dm.org/ravangen/graphql-rate-limit.png)](https://david-dm.org/ravangen/graphql-rate-limit)
+[![Development Dependency Status](https://david-dm.org/ravangen/graphql/dev-status.png)](https://david-dm.org/ravangen/graphql-rate-limit#info=devDependencies)
 
 Fixed window rate limiting directive for GraphQL. Use to limit repeated requests to queries and mutations.
 
