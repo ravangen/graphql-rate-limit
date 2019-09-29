@@ -4,8 +4,8 @@
 [![Codecov](https://img.shields.io/codecov/c/github/ravangen/graphql-rate-limit.svg?style=popout)](https://codecov.io/gh/ravangen/graphql-rate-limit)
 [![npm Version](https://img.shields.io/npm/v/graphql-rate-limit-directive.svg?style=popout)](https://www.npmjs.com/package/graphql-rate-limit-directive)
 [![npm Downloads](https://img.shields.io/npm/dm/graphql-rate-limit-directive.svg?style=popout)](https://www.npmjs.com/package/graphql-rate-limit-directive)
-[![Dependency Status](https://david-dm.org/ravangen/graphql-rate-limit.png)](https://david-dm.org/ravangen/graphql-rate-limit)
-[![Development Dependency Status](https://david-dm.org/ravangen/graphql/dev-status.png)](https://david-dm.org/ravangen/graphql-rate-limit#info=devDependencies)
+[![Dependency Status](https://david-dm.org/ravangen/graphql-rate-limit/status.svg)](https://david-dm.org/ravangen/graphql-rate-limit)
+[![Development Dependency Status](https://david-dm.org/ravangen/graphql-rate-limit/dev-status.png)](https://david-dm.org/ravangen/graphql-rate-limit#info=devDependencies)
 
 Fixed window rate limiting directive for GraphQL. Use to limit repeated requests to queries and mutations.
 
