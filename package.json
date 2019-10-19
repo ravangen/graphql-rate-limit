@@ -24,7 +24,7 @@
     "rate-limiter-flexible": "0.22.0 - 1"
   },
   "devDependencies": {
-    "@types/jest": "24.0.18",
+    "@types/jest": "24.0.19",
     "@types/node": "10.14.21",
     "jest": "24.9.0",
     "jest-junit": "8.0.0",
