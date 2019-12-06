@@ -8,9 +8,10 @@ const typeDefs = gql`
   type Query {
     # IMPORTANT: Both rate limits will be applied for each field, including when one limits and the other doesn't
     # Allow once every 15 seconds and three times every 60 seconds
+    # These are evaluated from right to left (the first directive is wrapped by the second directive)
     books: [Book!]
-      @burstRateLimit(limit: 1, duration: 15)
       @sustainedRateLimit(limit: 3, duration: 60)
+      @burstRateLimit(limit: 1, duration: 15)
     quote: String
   }
 

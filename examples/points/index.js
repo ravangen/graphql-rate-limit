@@ -6,7 +6,7 @@ const {
 } = require('graphql-rate-limit-directive');
 
 const typeDefs = gql`
-  # Give each field a 10 points every 30 seconds
+  # Give each field 10 points capacity every 30 seconds
   type Query @rateLimit(limit: 10, duration: 30) {
     books: [Book!]
     quote: String
