@@ -24,16 +24,16 @@
     "rate-limiter-flexible": "0.22.0 - 1"
   },
   "devDependencies": {
-    "@types/jest": "24.0.18",
-    "@types/node": "10.14.21",
-    "jest": "24.9.0",
-    "jest-junit": "8.0.0",
-    "prettier": "1.18.2",
-    "ts-jest": "24.1.0",
-    "tslint": "5.20.0",
+    "@types/jest": "25.1.1",
+    "@types/node": "10.17.14",
+    "jest": "25.1.0",
+    "jest-junit": "10.0.0",
+    "prettier": "1.19.1",
+    "ts-jest": "25.1.0",
+    "tslint": "5.20.1",
     "tslint-config-prettier": "1.18.0",
-    "tslint-config-standard": "8.0.1",
-    "typescript": "3.6.4"
+    "tslint-config-standard": "9.0.0",
+    "typescript": "3.7.5"
   },
   "homepage": "https://github.com/ravangen/graphql-rate-limit#readme",
   "author": "Robert Van Gennip <ravangen@gmail.com>",
