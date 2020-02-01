@@ -2935,7 +2935,7 @@ qs@~6.5.2:
   resolved "https://registry.yarnpkg.com/qs/-/qs-6.5.2.tgz#cb3ae806e8740444584ef154ce8ee98d403f3e36"
   integrity sha512-N5ZAX4/LxJmF+7wN74pUD6qAh9/wnvdQcjq9TZjevvXzSUo7bfmw91saqMjzGS2xq91/odN2dW/WOl7qQHNDGA==
 
-"rate-limiter-flexible@0.22.0 - 1":
+rate-limiter-flexible@^1.0.0:
   version "1.3.2"
   resolved "https://registry.yarnpkg.com/rate-limiter-flexible/-/rate-limiter-flexible-1.3.2.tgz#2e2e8730f76bc3c349e9941d1826d40603bcca55"
   integrity sha512-f+xNvGn+52G4nZVok9VB3LTE1kfDmqbnWKRayX5n2k/LEQ7doWrYvzmzFVh7ltmLgwEdEzoYwxGaXlfCjFg4Ag==
