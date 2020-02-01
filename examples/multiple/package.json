@@ -3,8 +3,8 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
-    "apollo-server": "2.3.3",
+    "apollo-server": "2.9.16",
     "graphql-rate-limit-directive": "../../dist",
-    "rate-limiter-flexible": "0.22.1"
+    "rate-limiter-flexible": "0.25.2"
   }
 }
