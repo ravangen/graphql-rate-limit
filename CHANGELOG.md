@@ -1,3 +1,7 @@
+## 1.2.1 – 2020-02-01
+
+- Update dependencies and examples
+
 ## 1.2.0 – 2019-09-29
 
 - Add `pointsCalculator` option to dynamically calculate how many points to consume
