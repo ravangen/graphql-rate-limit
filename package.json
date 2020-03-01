@@ -21,7 +21,7 @@
     "graphql": "^14.0.2",
     "graphql-tag": "^2.10.0",
     "graphql-tools": "^4.0.0",
-    "rate-limiter-flexible": "^1.0.0"
+    "rate-limiter-flexible": "^2.0.0"
   },
   "devDependencies": {
     "@types/jest": "25.1.3",
