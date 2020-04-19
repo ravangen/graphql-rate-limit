@@ -25,7 +25,7 @@
   },
   "devDependencies": {
     "@types/jest": "25.2.1",
-    "@types/node": "10.17.17",
+    "@types/node": "10.17.20",
     "jest": "25.1.0",
     "jest-junit": "10.0.0",
     "prettier": "1.19.1",
