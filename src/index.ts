@@ -215,12 +215,12 @@ export function createRateLimitDirective<TContext>({
     visitObject(object: GraphQLObjectType) {
       // Wrap fields for limiting that don't have their own @rateLimit
       const fields = object.getFields();
-      Object.values(fields).forEach(field => {
+      Object.values(fields).forEach((field) => {
         if (!field.astNode) return;
         const directives = field.astNode.directives;
         if (
           !directives ||
-          !directives.some(directive => directive.name.value === this.name)
+          !directives.some((directive) => directive.name.value === this.name)
         ) {
           this.rateLimit(field);
         }
