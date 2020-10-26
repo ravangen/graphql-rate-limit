@@ -20,7 +20,7 @@
   "dependencies": {
     "graphql": "^14.0.2",
     "graphql-tag": "^2.10.0",
-    "graphql-tools": "^4.0.0",
+    "graphql-tools": "^7.0.0",
     "rate-limiter-flexible": "^2.0.0"
   },
   "devDependencies": {
