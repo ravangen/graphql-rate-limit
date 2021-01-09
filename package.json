@@ -28,7 +28,7 @@
     "@types/node": "10.17.21",
     "jest": "25.5.4",
     "jest-junit": "10.0.0",
-    "prettier": "2.0.5",
+    "prettier": "2.2.1",
     "ts-jest": "25.4.0",
     "tslint": "5.20.1",
     "tslint-config-prettier": "1.18.0",
