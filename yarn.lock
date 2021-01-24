@@ -3086,9 +3086,9 @@ qs@~6.5.2:
   integrity sha512-N5ZAX4/LxJmF+7wN74pUD6qAh9/wnvdQcjq9TZjevvXzSUo7bfmw91saqMjzGS2xq91/odN2dW/WOl7qQHNDGA==
 
 rate-limiter-flexible@^2.0.0:
-  version "2.1.4"
-  resolved "https://registry.yarnpkg.com/rate-limiter-flexible/-/rate-limiter-flexible-2.1.4.tgz#198a0a8f421bb76149bcd99ce1c1db264c900eda"
-  integrity sha512-wtbWcqZbCqyAO1k63moagJlCZuPCEqbJJ6il1y2JVoiUyxlE36+cM7ETta9K6tTom9O5pNK+CxwHMgyyyJ31Gg==
+  version "2.2.1"
+  resolved "https://registry.yarnpkg.com/rate-limiter-flexible/-/rate-limiter-flexible-2.2.1.tgz#acb81a3d92a0f26bf7e9767e0f96de3a89ecb3a6"
+  integrity sha512-rxCP6kDDdn0cZmVqVlF06yLU+mG3TuwaHV/fUIw3OQyYhza7pzVBtdMhUmfXbBzMS+O464XP+x33pfTDGRGYVA==
 
 react-is@^16.12.0:
   version "16.12.0"
