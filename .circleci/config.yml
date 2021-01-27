@@ -58,3 +58,45 @@ jobs:
       - run:
           name: Running typechecker
           command: yarn run tsc
+
+  publish-typescript:
+    docker:
+      - image: circleci/node:10.20.1
+    working_directory: ~/graphql-rate-limit
+    steps:
+      - checkout
+      - run:
+          name: Determine Package Version
+          command: |
+            touch ~/.shared_env
+            CURRENT_PACKAGE_VERSION=$(node -p "require('./package.json').version")
+            if [ "${CIRCLE_BRANCH}" != "master" ]; then
+              PACKAGE_VERSION=${CURRENT_PACKAGE_VERSION}-dev$(date +%s)
+              sed -i -e "s/\"version\": \"${CURRENT_PACKAGE_VERSION}\",$/\"version\": \"${PACKAGE_VERSION}\",/" package.json
+            else
+              PACKAGE_VERSION=$CURRENT_PACKAGE_VERSION
+            fi
+            echo "export PACKAGE_VERSION=$PACKAGE_VERSION" >> ~/.shared_env
+      - run:
+          name: Build and publish
+          command: |
+            yarn
+            yarn publish:gemfury
+      - run:
+          name: Print Package Version
+          command: |
+            source ~/.shared_env
+            echo "Your package version is: ${PACKAGE_VERSION}"
+            echo "Add this to your package.json and run yarn (if applicable) to use this development version"
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - build-and-test:
+          jobs:
+            - build
+      - publish:
+          context: wave-publish-gemfury
+          requires:
+            - build
