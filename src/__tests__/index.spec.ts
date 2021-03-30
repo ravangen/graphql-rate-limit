@@ -8,8 +8,8 @@ import {
   RateLimiterRes,
 } from 'rate-limiter-flexible';
 import {
-  createRateLimitTypeDef,
   createRateLimitDirective,
+  createRateLimitTypeDef,
   RateLimitArgs,
 } from '../index';
 
