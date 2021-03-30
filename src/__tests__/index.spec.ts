@@ -1,17 +1,18 @@
 import { graphql, GraphQLResolveInfo } from 'graphql';
 import gql from 'graphql-tag';
 import {
-  makeExecutableSchema,
   IResolverValidationOptions,
+  makeExecutableSchema,
 } from 'graphql-tools';
+import { DirectiveDefinitionNode } from 'graphql/language/ast';
 import {
   IRateLimiterOptions,
   RateLimiterMemory,
   RateLimiterRes,
 } from 'rate-limiter-flexible';
 import {
-  createRateLimitTypeDef,
   createRateLimitDirective,
+  createRateLimitTypeDef,
   RateLimitArgs,
 } from '../index';
 
@@ -20,7 +21,10 @@ describe('createRateLimitTypeDef', () => {
     const directiveName = 'customRateLimit';
     const directiveTypeDef = createRateLimitTypeDef(directiveName);
 
-    expect(directiveTypeDef.definitions[0].name.value).toBe(directiveName);
+    const definitionNode = directiveTypeDef
+      .definitions[0] as DirectiveDefinitionNode;
+
+    expect(definitionNode.name.value).toBe(directiveName);
     expect(directiveTypeDef).toMatchSnapshot();
   });
 });
@@ -44,7 +48,7 @@ describe('createRateLimitDirective', () => {
     },
   };
   const resolverValidationOptions: IResolverValidationOptions = {
-    allowResolversNotInSchema: true,
+    requireResolversToMatchSchema: 'ignore',
   };
   beforeEach(() => {
     consume.mockReset();

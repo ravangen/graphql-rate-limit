@@ -1,9 +1,9 @@
 import {
   defaultFieldResolver,
+  GraphQLError,
   GraphQLField,
   GraphQLObjectType,
   GraphQLResolveInfo,
-  GraphQLError,
 } from 'graphql';
 import gql from 'graphql-tag';
 import { SchemaDirectiveVisitor } from 'graphql-tools';
@@ -183,13 +183,11 @@ export function createRateLimitDirective<TContext>({
     `${limit}/${duration}s`;
 
   return class extends SchemaDirectiveVisitor {
-    public readonly args: RateLimitArgs;
-
     // Use createRateLimitTypeDef until graphql-tools fixes getDirectiveDeclaration
     // public static getDirectiveDeclaration(
     //   directiveName: string,
     //   schema: GraphQLSchema,
-    // ): GraphQLDirective {
+    // ): GraphQLDirective | null | undefined {
     //   return new GraphQLDirective({
     //     name: directiveName,
     //     description: 'Controls the rate of traffic.',
