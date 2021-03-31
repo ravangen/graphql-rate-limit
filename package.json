@@ -10,11 +10,10 @@
   },
   "scripts": {
     "build": "rm -rf dist && tsc -d",
-    "lint": "yarn tsc; yarn lint:fmt; yarn lint:ts",
-    "lint:fmt": "prettier --write 'src/**/*.ts'",
-    "lint:ts": "tslint --project tsconfig.json --fix --config tslint.json 'src/**/*.ts'",
-    "ci:lint:fmt": "prettier --list-different 'src/**/*.ts'",
-    "ci:lint:ts": "tslint --project tsconfig.json --config tslint.json 'src/**/*.ts'",
+    "format": "eslint --fix 'src/**'",
+    "ci:format": "eslint 'src/**'",
+    "typecheck": "tsc",
+    "lint": "yarn typecheck; yarn format",
     "test": "jest"
   },
   "dependencies": {
@@ -26,13 +25,15 @@
   "devDependencies": {
     "@types/jest": "26.0.22",
     "@types/node": "10.17.21",
+    "@typescript-eslint/eslint-plugin": "4.20.0",
+    "@typescript-eslint/parser": "4.20.0",
+    "eslint": "7.23.0",
+    "eslint-config-prettier": "8.1.0",
+    "eslint-plugin-prettier": "3.3.1",
     "jest": "26.6.3",
     "jest-junit": "12.0.0",
     "prettier": "2.2.1",
     "ts-jest": "26.5.4",
-    "tslint": "5.20.1",
-    "tslint-config-prettier": "1.18.0",
-    "tslint-config-standard": "9.0.0",
     "typescript": "4.2.3"
   },
   "homepage": "https://github.com/ravangen/graphql-rate-limit#readme",
