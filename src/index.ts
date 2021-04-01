@@ -7,7 +7,7 @@ import {
   GraphQLError,
 } from 'graphql';
 import gql from 'graphql-tag';
-import { SchemaDirectiveVisitor } from 'graphql-tools';
+import { SchemaDirectiveVisitor } from '@graphql-tools/utils';
 import {
   IRateLimiterOptions,
   RateLimiterAbstract,
@@ -190,7 +190,7 @@ export function createRateLimitDirective<TContext>({
     `${limit}/${duration}s`;
 
   return class extends SchemaDirectiveVisitor {
-    public readonly args: RateLimitArgs;
+    // public readonly args: RateLimitArgs;
 
     // Use createRateLimitTypeDef until graphql-tools fixes getDirectiveDeclaration
     // public static getDirectiveDeclaration(

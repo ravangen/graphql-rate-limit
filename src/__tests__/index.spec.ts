@@ -1,9 +1,7 @@
 import { graphql, DirectiveDefinitionNode, GraphQLResolveInfo } from 'graphql';
 import gql from 'graphql-tag';
-import {
-  makeExecutableSchema,
-  IResolverValidationOptions,
-} from 'graphql-tools';
+import { makeExecutableSchema } from '@graphql-tools/schema';
+import { IResolverValidationOptions } from '@graphql-tools/utils';
 import {
   IRateLimiterOptions,
   RateLimiterMemory,
@@ -48,7 +46,7 @@ describe('createRateLimitDirective', () => {
     },
   };
   const resolverValidationOptions: IResolverValidationOptions = {
-    allowResolversNotInSchema: true,
+    requireResolversToMatchSchema: 'ignore',
   };
   beforeEach(() => {
     consume.mockReset();
