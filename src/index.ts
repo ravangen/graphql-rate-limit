@@ -1,12 +1,13 @@
 import {
   defaultFieldResolver,
+  DocumentNode,
+  GraphQLError,
   GraphQLField,
   GraphQLObjectType,
   GraphQLResolveInfo,
-  GraphQLError,
 } from 'graphql';
 import gql from 'graphql-tag';
-import { SchemaDirectiveVisitor } from 'graphql-tools';
+import { SchemaDirectiveVisitor } from '@graphql-tools/utils';
 import {
   IRateLimiterOptions,
   RateLimiterAbstract,
@@ -30,16 +31,16 @@ export interface RateLimitArgs {
 
 export type RateLimitKeyGenerator<TContext> = (
   directiveArgs: RateLimitArgs,
-  obj: any,
-  args: { [key: string]: any },
+  obj: unknown,
+  args: { [key: string]: unknown },
   context: TContext,
   info: GraphQLResolveInfo,
 ) => Promise<string> | string;
 
 export type RateLimitPointsCalculator<TContext> = (
   directiveArgs: RateLimitArgs,
-  obj: any,
-  args: { [key: string]: any },
+  obj: unknown,
+  args: { [key: string]: unknown },
   context: TContext,
   info: GraphQLResolveInfo,
 ) => Promise<number> | number;
@@ -47,11 +48,11 @@ export type RateLimitPointsCalculator<TContext> = (
 export type RateLimitOnLimit<TContext> = (
   resource: RateLimiterRes,
   directiveArgs: RateLimitArgs,
-  obj: any,
-  args: { [key: string]: any },
+  obj: unknown,
+  args: { [key: string]: unknown },
   context: TContext,
   info: GraphQLResolveInfo,
-) => any;
+) => unknown;
 
 /**
  * Configure rate limit behaviour.
@@ -95,8 +96,8 @@ export interface IOptions<TContext> {
  */
 export function defaultKeyGenerator<TContext>(
   directiveArgs: RateLimitArgs,
-  obj: any,
-  args: { [key: string]: any },
+  obj: unknown,
+  args: { [key: string]: unknown },
   context: TContext,
   info: GraphQLResolveInfo,
 ): string {
@@ -112,11 +113,13 @@ export function defaultKeyGenerator<TContext>(
  * @param info Holds field-specific information relevant to the current operation as well as the schema details.
  */
 export function defaultPointsCalculator<TContext>(
+  /* eslint-disable @typescript-eslint/no-unused-vars */
   directiveArgs: RateLimitArgs,
-  obj: any,
-  args: { [key: string]: any },
+  obj: unknown,
+  args: { [key: string]: unknown },
   context: TContext,
   info: GraphQLResolveInfo,
+  /* eslint-enable @typescript-eslint/no-unused-vars */
 ): number {
   return 1;
 }
@@ -132,12 +135,14 @@ export function defaultPointsCalculator<TContext>(
  */
 export function defaultOnLimit<TContext>(
   resource: RateLimiterRes,
+  /* eslint-disable @typescript-eslint/no-unused-vars */
   directiveArgs: RateLimitArgs,
-  obj: any,
-  args: { [key: string]: any },
+  obj: unknown,
+  args: { [key: string]: unknown },
   context: TContext,
   info: GraphQLResolveInfo,
-): any {
+  /* eslint-enable @typescript-eslint/no-unused-vars */
+): unknown {
   throw new GraphQLError(
     `Too many requests, please try again in ${Math.ceil(
       resource.msBeforeNext / 1000,
@@ -149,7 +154,9 @@ export function defaultOnLimit<TContext>(
  * Create a GraphQL directive type definition.
  * @param directiveName Name of the directive
  */
-export function createRateLimitTypeDef(directiveName: string = 'rateLimit') {
+export function createRateLimitTypeDef(
+  directiveName = 'rateLimit',
+): DocumentNode {
   return gql`
   """
   Controls the rate of traffic.
@@ -183,13 +190,11 @@ export function createRateLimitDirective<TContext>({
     `${limit}/${duration}s`;
 
   return class extends SchemaDirectiveVisitor {
-    public readonly args: RateLimitArgs;
-
     // Use createRateLimitTypeDef until graphql-tools fixes getDirectiveDeclaration
     // public static getDirectiveDeclaration(
     //   directiveName: string,
     //   schema: GraphQLSchema,
-    // ): GraphQLDirective {
+    // ): GraphQLDirective | null | undefined {
     //   return new GraphQLDirective({
     //     name: directiveName,
     //     description: 'Controls the rate of traffic.',
@@ -227,7 +232,7 @@ export function createRateLimitDirective<TContext>({
       });
     }
 
-    visitFieldDefinition(field: GraphQLField<any, TContext>) {
+    visitFieldDefinition(field: GraphQLField<unknown, TContext>) {
       this.rateLimit(field);
     }
 
@@ -249,7 +254,7 @@ export function createRateLimitDirective<TContext>({
       return limiter;
     }
 
-    private rateLimit(field: GraphQLField<any, TContext>) {
+    private rateLimit(field: GraphQLField<unknown, TContext>) {
       const { resolve = defaultFieldResolver } = field;
       const limiter = this.getLimiter();
       field.resolve = async (obj, args, context, info) => {

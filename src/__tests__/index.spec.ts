@@ -1,17 +1,15 @@
-import { graphql, GraphQLResolveInfo } from 'graphql';
+import { graphql, DirectiveDefinitionNode, GraphQLResolveInfo } from 'graphql';
 import gql from 'graphql-tag';
-import {
-  makeExecutableSchema,
-  IResolverValidationOptions,
-} from 'graphql-tools';
+import { makeExecutableSchema } from '@graphql-tools/schema';
+import { IResolverValidationOptions } from '@graphql-tools/utils';
 import {
   IRateLimiterOptions,
   RateLimiterMemory,
   RateLimiterRes,
 } from 'rate-limiter-flexible';
 import {
-  createRateLimitTypeDef,
   createRateLimitDirective,
+  createRateLimitTypeDef,
   RateLimitArgs,
 } from '../index';
 
@@ -19,8 +17,12 @@ describe('createRateLimitTypeDef', () => {
   it('creates custom directive definition', () => {
     const directiveName = 'customRateLimit';
     const directiveTypeDef = createRateLimitTypeDef(directiveName);
+    const directiveDefinition = directiveTypeDef.definitions.find(
+      (definition): definition is DirectiveDefinitionNode =>
+        definition.kind == 'DirectiveDefinition',
+    );
 
-    expect(directiveTypeDef.definitions[0].name.value).toBe(directiveName);
+    expect(directiveDefinition?.name?.value).toBe(directiveName);
     expect(directiveTypeDef).toMatchSnapshot();
   });
 });
@@ -44,7 +46,7 @@ describe('createRateLimitDirective', () => {
     },
   };
   const resolverValidationOptions: IResolverValidationOptions = {
-    allowResolversNotInSchema: true,
+    requireResolversToMatchSchema: 'ignore',
   };
   beforeEach(() => {
     consume.mockReset();
@@ -196,8 +198,8 @@ describe('createRateLimitDirective', () => {
     };
     const keyGenerator = (
       directiveArgs: RateLimitArgs,
-      obj: any,
-      args: { [key: string]: any },
+      obj: unknown,
+      args: { [key: string]: unknown },
       context: IContext,
       info: GraphQLResolveInfo,
     ) => {
@@ -244,10 +246,12 @@ describe('createRateLimitDirective', () => {
     const onLimit = (
       resource: RateLimiterRes,
       directiveArgs: RateLimitArgs,
-      obj: any,
-      args: { [key: string]: any },
-      context: object,
+      /* eslint-disable @typescript-eslint/no-unused-vars */
+      obj: unknown,
+      args: { [key: string]: unknown },
+      context: Record<string, unknown>,
       info: GraphQLResolveInfo,
+      /* eslint-enable @typescript-eslint/no-unused-vars */
     ) => {
       expect(resource).toBe(consumeResponse);
       expect(directiveArgs.limit).toBe(10);
@@ -276,11 +280,13 @@ describe('createRateLimitDirective', () => {
       }
     `;
     const pointsCalculator = (
+      /* eslint-disable @typescript-eslint/no-unused-vars */
       directiveArgs: RateLimitArgs,
-      obj: any,
-      args: { [key: string]: any },
-      context: object,
+      obj: unknown,
+      args: { [key: string]: unknown },
+      context: Record<string, unknown>,
       info: GraphQLResolveInfo,
+      /* eslint-enable @typescript-eslint/no-unused-vars */
     ) => {
       return 2;
     };
@@ -306,11 +312,13 @@ describe('createRateLimitDirective', () => {
       }
     `;
     const pointsCalculator = (
+      /* eslint-disable @typescript-eslint/no-unused-vars */
       directiveArgs: RateLimitArgs,
-      obj: any,
-      args: { [key: string]: any },
-      context: object,
+      obj: unknown,
+      args: { [key: string]: unknown },
+      context: Record<string, unknown>,
       info: GraphQLResolveInfo,
+      /* eslint-enable @typescript-eslint/no-unused-vars */
     ) => {
       return 0;
     };

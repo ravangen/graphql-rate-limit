@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/node:10.20.1
+      - image: circleci/node:14.16.0
     steps:
       - checkout
 
@@ -48,13 +48,9 @@ jobs:
           command: bash <(curl -s https://codecov.io/bash) || echo 'Codecov failed to upload'
 
       - run:
-          name: Running prettier
-          command: yarn run ci:lint:fmt
+          name: Checking problems and styles
+          command: yarn run ci:format
 
       - run:
-          name: Running tslint
-          command: yarn run ci:lint:ts
-
-      - run:
-          name: Running typechecker
-          command: yarn run tsc
+          name: Checking types
+          command: yarn run typecheck

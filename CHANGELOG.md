@@ -1,3 +1,7 @@
+## 1.3.0 – 2021-04-01
+
+- Update dependencies, minimum `GraphQL.js` version is now `15`
+
 ## 1.2.1 – 2020-02-01
 
 - Update dependencies and examples
