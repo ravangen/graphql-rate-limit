@@ -14,7 +14,7 @@ Fixed window rate limiting directive for GraphQL. Use to limit repeated requests
 - 👨‍💻 **Identification**: Distinguish requests using resolver data
 - 🎯 [**Per-Object or Per-Field**](#step-3-attach-directive-to-field-or-object): Limit by objects and specific fields
 - 📦 [**Storage**](#limiterclass): Supports multiple data store choices (_Redis_, process _Memory_, ...)
-- ♾️ [**Throttles**](examples/multiple/README.md): Define any number of limits per field
+- ♾️ [**Throttles**](examples/multiple): Define any number of limits per field
 - 😍 **TypeScript**: Written in and exports type definitions
 
 ## Install
@@ -85,12 +85,12 @@ type Query @rateLimit(limit: 60, duration: 60) {
 
 Additional, advanced examples are available in the [examples](examples) folder:
 
-- [Context](examples/context/README.md): isolating operations between users
-- [Points](examples/points/README.md): customize the cost of a field resolution
-- [Redis](examples/redis/README.md): share state in a distrubuted environment
-- [Multiple](examples/multiple/README.md): applying multiple rate limits on the same field
-- [onLimit Error](examples/onlimit-error/README.md): custom error raised
-- [onLimit Object](examples/onlimit-object/README.md): custom result instead of default resolution
+- [Context](examples/context): isolating operations between users
+- [Points](examples/points): customize the cost of a field resolution
+- [Redis](examples/redis): share state in a distrubuted environment
+- [Multiple](examples/multiple): applying multiple rate limits on the same field
+- [onLimit Error](examples/onlimit-error): custom error raised
+- [onLimit Object](examples/onlimit-object): custom result instead of default resolution
 
 ```javascript
 const { ApolloServer, gql } = require('apollo-server');
@@ -169,7 +169,7 @@ It is common to specify at least [`keyGenerator`](#keyGenerator) and [`limiterCl
 
 A key is generated to identify each request for each field being rate limited. To ensure isolation, the key is recommended to be unique per field. Supports both synchronous and asynchronous functions.
 
-By default, it does _not_ provide user or client independent rate limiting. See [`defaultKeyGenerator`](#defaultkeygeneratordirectiveargs-obj-args-context-info) and [context example](examples/context/README.md).
+By default, it does _not_ provide user or client independent rate limiting. See [`defaultKeyGenerator`](#defaultkeygeneratordirectiveargs-obj-args-context-info) and [context example](examples/context).
 
 **WARNING**: Inside a generator function, consider accessing the GraphQL `context` or memoizing any expensive calls (HTTP, database, ...) as the functions is run for each rate limited field.
 
@@ -181,7 +181,7 @@ Storage implementations are provided by [`rate-limiter-flexible`](https://github
 
 Supports [_Redis_](https://github.com/animir/node-rate-limiter-flexible/wiki/Redis), process [_Memory_](https://github.com/animir/node-rate-limiter-flexible/wiki/Memory), [_Cluster_](https://github.com/animir/node-rate-limiter-flexible/wiki/Cluster) or [_PM2_](https://github.com/animir/node-rate-limiter-flexible/wiki/PM2-cluster), [_Memcached_](https://github.com/animir/node-rate-limiter-flexible/wiki/Memcache), [_MongoDB_](https://github.com/animir/node-rate-limiter-flexible/wiki/Mongo), [_MySQL_](https://github.com/animir/node-rate-limiter-flexible/wiki/MySQL), [_PostgreSQL_](https://github.com/animir/node-rate-limiter-flexible/wiki/PostgreSQL) to control requests rate in single process or distributed environment.
 
-Memory store is the default but _not_ recommended for production as it does not share state with other servers or processes. See [Redis example](examples/redis/README.md) for use in a distributed environment.
+Memory store is the default but _not_ recommended for production as it does not share state with other servers or processes. See [Redis example](examples/redis) for use in a distributed environment.
 
 ##### `limiterOptions`
 
@@ -203,7 +203,7 @@ Default with [`defaultPointsCalculator`](#defaultpointscalculatordirectiveargs-o
 
 > Behaviour when limit is exceeded.
 
-Throw an error or return an object describing a reached limit and when it will reset. Default is to throw an error using [`defaultOnLimit`](#defaultonlimitresource-directiveargs-obj-args-context-info). See [error example](examples/onlimit-error/README.md) and [object example](examples/onlimit-object/README.md).
+Throw an error or return an object describing a reached limit and when it will reset. Default is to throw an error using [`defaultOnLimit`](#defaultonlimitresource-directiveargs-obj-args-context-info). See [error example](examples/onlimit-error) and [object example](examples/onlimit-object).
 
 ### `createRateLimitTypeDef(directiveName?)`
 
@@ -221,7 +221,7 @@ Name of the directive to create.
 
 A field is identified by the key `${info.parentType}.${info.fieldName}`. This does _not_ provide user or client independent rate limiting. User A could consume all the capacity and starve out User B.
 
-This function can be used in conjunction with `context` information to ensure user/client isolation. See [context example](examples/context/README.md).
+This function can be used in conjunction with `context` information to ensure user/client isolation. See [context example](examples/context).
 
 #### `directiveArgs`
 
