@@ -24,7 +24,7 @@
     "rate-limiter-flexible": "^2.0.0"
   },
   "devDependencies": {
-    "@types/jest": "26.0.22",
+    "@types/jest": "27.0.1",
     "@types/node": "16.6.1",
     "@typescript-eslint/eslint-plugin": "4.20.0",
     "@typescript-eslint/parser": "4.20.0",
