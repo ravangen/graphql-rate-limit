@@ -3135,9 +3135,9 @@ queue-microtask@^1.2.2:
   integrity sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==
 
 rate-limiter-flexible@^2.0.0:
-  version "2.2.4"
-  resolved "https://registry.yarnpkg.com/rate-limiter-flexible/-/rate-limiter-flexible-2.2.4.tgz#fc3ee5ec610d7289717b5cbba58bf89332b074b1"
-  integrity sha512-8u4k5b1afuBcfydX0L0l3J2PNjgcuo3zua8plhvIisyDqOBldrCwfSFut/Fj00LAB1nxJYVM9jeszr2rZyDhQw==
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/rate-limiter-flexible/-/rate-limiter-flexible-2.3.1.tgz#e37cd5d8cae26235a425b0dae0a6d336fbf61757"
+  integrity sha512-u4Ual0ssf/RHHxK3rqKo9W2S7ulVoNdCAOrsk1gR9JLtzqg7fGw+yaCeyBAEncsL2n6XqHh/0qJk3BPDn49BjA==
 
 react-is@^17.0.1:
   version "17.0.2"
