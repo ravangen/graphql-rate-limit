@@ -1,10 +1,16 @@
 version: 2.1
-orbs:
-  codecov: codecov/codecov@3.1.1
-jobs:
-  build:
+
+executors:
+  default:
     docker:
       - image: circleci/node:16.10.0
+
+orbs:
+  codecov: codecov/codecov@3.1.1
+
+jobs:
+  setup:
+    executor: default
     steps:
       - checkout
 
@@ -30,9 +36,26 @@ jobs:
           name: Checking dependency integrity
           command: yarn check --integrity --verify-tree
 
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+
+  build:
+    executor: default
+    steps:
+      - attach_workspace:
+          at: .
+
       - run:
-          name: Build dependencies
+          name: Compile
           command: yarn build
+
+  test:
+    executor: default
+    steps:
+      - attach_workspace:
+          at: .
 
       - run:
           name: Running tests
@@ -48,10 +71,31 @@ jobs:
       - codecov/upload:
           file: /tmp/test-reports/jest/junit.xml
 
+  lint:
+    executor: default
+    steps:
+      - attach_workspace:
+          at: .
+
       - run:
-          name: Checking problems and styles
+          name: Linting
           command: yarn run ci:format
 
       - run:
-          name: Checking types
+          name: Type checking
           command: yarn run typecheck
+
+workflows:
+  version: 2
+  build-and-test:
+    jobs:
+      - setup
+      - build:
+          requires:
+            - setup
+      - test:
+          requires:
+            - setup
+      - lint:
+          requires:
+            - setup
