@@ -1,8 +1,16 @@
-version: 2
-jobs:
-  build:
+version: 2.1
+
+executors:
+  default:
     docker:
       - image: circleci/node:16.10.0
+
+orbs:
+  codecov: codecov/codecov@3.1.1
+
+jobs:
+  setup:
+    executor: default
     steps:
       - checkout
 
@@ -28,29 +36,66 @@ jobs:
           name: Checking dependency integrity
           command: yarn check --integrity --verify-tree
 
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+
+  build:
+    executor: default
+    steps:
+      - attach_workspace:
+          at: .
+
       - run:
-          name: Build dependencies
+          name: Compile
           command: yarn build
+
+  test:
+    executor: default
+    steps:
+      - attach_workspace:
+          at: .
 
       - run:
           name: Running tests
           command: |
             mkdir -p /tmp/test-reports
-            yarn run test --ci --coverage --reporters=default --reporters=jest-junit
+            yarn run test --ci --runInBand --reporters=default --reporters=jest-junit --coverage
           environment:
-            - JEST_JUNIT_OUTPUT: /tmp/test-reports/jest/junit.xml
+            - JEST_JUNIT_OUTPUT_DIR: ./reports/junit/
 
       - store_test_results:
-          path: /tmp/test-reports
+          path: ./reports/junit/
+
+      - codecov/upload:
+          file: ./reports/coverage/coverage-final.json
+
+  lint:
+    executor: default
+    steps:
+      - attach_workspace:
+          at: .
 
       - run:
-          name: Uploading test coverage
-          command: bash <(curl -s https://codecov.io/bash) || echo 'Codecov failed to upload'
-
-      - run:
-          name: Checking problems and styles
+          name: Linting
           command: yarn run ci:format
 
       - run:
-          name: Checking types
+          name: Type checking
           command: yarn run typecheck
+
+workflows:
+  version: 2
+  build-and-test:
+    jobs:
+      - setup
+      - build:
+          requires:
+            - setup
+      - test:
+          requires:
+            - setup
+      - lint:
+          requires:
+            - setup
