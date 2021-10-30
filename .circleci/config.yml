@@ -61,15 +61,15 @@ jobs:
           name: Running tests
           command: |
             mkdir -p /tmp/test-reports
-            yarn run test --ci --coverage --reporters=default --reporters=jest-junit
+            yarn run test --ci --runInBand --reporters=default --reporters=jest-junit --coverage
           environment:
-            - JEST_JUNIT_OUTPUT: /tmp/test-reports/jest/junit.xml
+            - JEST_JUNIT_OUTPUT_DIR: ./reports/junit/
 
       - store_test_results:
-          path: /tmp/test-reports
+          path: ./reports/junit/
 
       - codecov/upload:
-          file: /tmp/test-reports/jest/junit.xml
+          file: ./reports/coverage/coverage-final.json
 
   lint:
     executor: default
