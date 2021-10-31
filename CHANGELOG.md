@@ -1,3 +1,8 @@
+## 2.0.0 - 2021-10-31
+
+- Update dependencies, minimum `graphql-tools` version is now `8`
+- `IOptions` renamed to `RateLimitOptions`, adds `name`, `defaultLimit`, `defaultDuration` optional arguments.
+
 ## 1.3.0 – 2021-04-01
 
 - Update dependencies, minimum `GraphQL.js` version is now `15`

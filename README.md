@@ -163,6 +163,24 @@ server
 
 It is common to specify at least [`keyGenerator`](#keyGenerator) and [`limiterClass`](#limiterClass).
 
+##### `name`
+
+> Name of the directive.
+
+Override the name of the directive, defaults to `rateLimit`.
+
+##### `defaultLimit`
+
+> Default value for argument limit.
+
+Override the directive's `limit` argument's default value, defaults to `60`.
+
+##### `defaultDuration`
+
+> Default value for argument duration.
+
+Override the directive's `duration` argument's default value, defaults to `60`.
+
 ##### `keyGenerator`
 
 > Constructs a key to represent an operation on a field.
