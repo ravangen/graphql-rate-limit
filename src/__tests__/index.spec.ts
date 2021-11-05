@@ -8,20 +8,11 @@ import {
   GraphQLResolveInfo,
   GraphQLSchema,
 } from 'graphql';
-import {
-  IRateLimiterOptions,
-  RateLimiterMemory,
-  RateLimiterRes,
-} from 'rate-limiter-flexible';
+import { IRateLimiterOptions, RateLimiterMemory, RateLimiterRes } from 'rate-limiter-flexible';
 import { rateLimitDirective, RateLimitArgs } from '../index';
 
-const getDirective = (
-  schema: GraphQLSchema,
-  name = 'rateLimit',
-): GraphQLDirective => {
-  const directive = schema
-    .getDirectives()
-    .find((directive) => directive.name == name);
+const getDirective = (schema: GraphQLSchema, name = 'rateLimit'): GraphQLDirective => {
+  const directive = schema.getDirectives().find((directive) => directive.name == name);
   expect(directive).toBeDefined();
   // See https://github.com/DefinitelyTyped/DefinitelyTyped/issues/41179
   return directive!; // eslint-disable-line @typescript-eslint/no-non-null-assertion
@@ -37,28 +28,24 @@ describe('rateLimitDirective', () => {
   it('creates custom named directive', () => {
     const name = 'customRateLimit';
 
-    const { rateLimitDirectiveTypeDefs, rateLimitDirectiveTransformer } =
-      rateLimitDirective({
-        name,
-      });
+    const { rateLimitDirectiveTypeDefs, rateLimitDirectiveTransformer } = rateLimitDirective({
+      name,
+    });
     const schema = rateLimitDirectiveTransformer(
       makeExecutableSchema({
         typeDefs: [rateLimitDirectiveTypeDefs, ``],
       }),
     );
 
-    expect(getDirective(schema, name)).toEqual(
-      expect.objectContaining({ name }),
-    );
+    expect(getDirective(schema, name)).toEqual(expect.objectContaining({ name }));
   });
 
   it('overrides limit argument default value', () => {
     const defaultLimit = '30';
 
-    const { rateLimitDirectiveTypeDefs, rateLimitDirectiveTransformer } =
-      rateLimitDirective({
-        defaultLimit,
-      });
+    const { rateLimitDirectiveTypeDefs, rateLimitDirectiveTransformer } = rateLimitDirective({
+      defaultLimit,
+    });
     const schema = rateLimitDirectiveTransformer(
       makeExecutableSchema({
         typeDefs: [rateLimitDirectiveTypeDefs, ``],
@@ -66,19 +53,16 @@ describe('rateLimitDirective', () => {
     );
 
     expect(getDirective(schema).args).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ name: 'limit', defaultValue: 30 }),
-      ]),
+      expect.arrayContaining([expect.objectContaining({ name: 'limit', defaultValue: 30 })]),
     );
   });
 
   it('overrides duration argument default value', () => {
     const defaultDuration = '30';
 
-    const { rateLimitDirectiveTypeDefs, rateLimitDirectiveTransformer } =
-      rateLimitDirective({
-        defaultDuration,
-      });
+    const { rateLimitDirectiveTypeDefs, rateLimitDirectiveTransformer } = rateLimitDirective({
+      defaultDuration,
+    });
     const schema = rateLimitDirectiveTransformer(
       makeExecutableSchema({
         typeDefs: [rateLimitDirectiveTypeDefs, ``],
@@ -86,9 +70,7 @@ describe('rateLimitDirective', () => {
     );
 
     expect(getDirective(schema).args).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ name: 'duration', defaultValue: 30 }),
-      ]),
+      expect.arrayContaining([expect.objectContaining({ name: 'duration', defaultValue: 30 })]),
     );
   });
 
@@ -103,11 +85,10 @@ describe('rateLimitDirective', () => {
       }
     }
 
-    const { rateLimitDirectiveTypeDefs, rateLimitDirectiveTransformer } =
-      rateLimitDirective({
-        limiterClass: CustomRateLimiter,
-        limiterOptions: { keyPrefix },
-      });
+    const { rateLimitDirectiveTypeDefs, rateLimitDirectiveTransformer } = rateLimitDirective({
+      limiterClass: CustomRateLimiter,
+      limiterOptions: { keyPrefix },
+    });
     const schema = rateLimitDirectiveTransformer(
       makeExecutableSchema({
         typeDefs: [
@@ -153,8 +134,7 @@ describe('rateLimitDirective', () => {
     });
 
     it('a specific field', async () => {
-      const { rateLimitDirectiveTypeDefs, rateLimitDirectiveTransformer } =
-        rateLimitDirective();
+      const { rateLimitDirectiveTypeDefs, rateLimitDirectiveTransformer } = rateLimitDirective();
       const schema = rateLimitDirectiveTransformer(
         makeExecutableSchema({
           typeDefs: [
@@ -176,8 +156,7 @@ describe('rateLimitDirective', () => {
     });
 
     it('a repeated object', async () => {
-      const { rateLimitDirectiveTypeDefs, rateLimitDirectiveTransformer } =
-        rateLimitDirective();
+      const { rateLimitDirectiveTypeDefs, rateLimitDirectiveTransformer } = rateLimitDirective();
       const schema = rateLimitDirectiveTransformer(
         makeExecutableSchema({
           typeDefs: [
@@ -203,8 +182,7 @@ describe('rateLimitDirective', () => {
     });
 
     it('each field of an object', async () => {
-      const { rateLimitDirectiveTypeDefs, rateLimitDirectiveTransformer } =
-        rateLimitDirective();
+      const { rateLimitDirectiveTypeDefs, rateLimitDirectiveTransformer } = rateLimitDirective();
       const schema = rateLimitDirectiveTransformer(
         makeExecutableSchema({
           typeDefs: [
@@ -231,8 +209,7 @@ describe('rateLimitDirective', () => {
     });
 
     it('overrides field of an object', async () => {
-      const { rateLimitDirectiveTypeDefs, rateLimitDirectiveTransformer } =
-        rateLimitDirective();
+      const { rateLimitDirectiveTypeDefs, rateLimitDirectiveTransformer } = rateLimitDirective();
       const schema = rateLimitDirectiveTransformer(
         makeExecutableSchema({
           typeDefs: [
@@ -250,19 +227,14 @@ describe('rateLimitDirective', () => {
         }),
       );
 
-      const response = await graphql(
-        schema,
-        'query { books { title author } }',
-      );
+      const response = await graphql(schema, 'query { books { title author } }');
 
       expect(limiterConsume).toHaveBeenCalledTimes(4);
       expect(limiterConsume).toHaveBeenCalledWith('Book.title', 1);
       expect(limiterConsume).toHaveBeenCalledWith('Book.author', 1);
 
       const error = getError(response);
-      expect(error.message).toMatch(
-        /Too many requests, please try again in \d+ seconds\./,
-      );
+      expect(error.message).toMatch(/Too many requests, please try again in \d+ seconds\./);
       expect(error.path).toEqual(['books', expect.any(Number), 'author']);
     });
 
@@ -272,8 +244,7 @@ describe('rateLimitDirective', () => {
         throw new Error(message);
       });
 
-      const { rateLimitDirectiveTypeDefs, rateLimitDirectiveTransformer } =
-        rateLimitDirective();
+      const { rateLimitDirectiveTypeDefs, rateLimitDirectiveTransformer } = rateLimitDirective();
       const schema = rateLimitDirectiveTransformer(
         makeExecutableSchema({
           typeDefs: [
@@ -315,14 +286,13 @@ describe('rateLimitDirective', () => {
           /* eslint-enable @typescript-eslint/no-unused-vars */
         ) => {
           // This could be sync, but that case is widely tested already so force this to return a Promise
-          return Promise.resolve(
-            `${context.ip}:${info.parentType}.${info.fieldName}`,
-          );
+          return Promise.resolve(`${context.ip}:${info.parentType}.${info.fieldName}`);
         },
       );
 
-      const { rateLimitDirectiveTypeDefs, rateLimitDirectiveTransformer } =
-        rateLimitDirective({ keyGenerator });
+      const { rateLimitDirectiveTypeDefs, rateLimitDirectiveTransformer } = rateLimitDirective({
+        keyGenerator,
+      });
       const schema = rateLimitDirectiveTransformer(
         makeExecutableSchema({
           typeDefs: [
@@ -336,12 +306,7 @@ describe('rateLimitDirective', () => {
         }),
       );
 
-      const response = await graphql(
-        schema,
-        'query { quote }',
-        undefined,
-        context,
-      );
+      const response = await graphql(schema, 'query { quote }', undefined, context);
 
       expect(keyGenerator).toHaveBeenCalledWith(
         { limit: 10, duration: 300 },
@@ -368,8 +333,9 @@ describe('rateLimitDirective', () => {
         ) => 2,
       );
 
-      const { rateLimitDirectiveTypeDefs, rateLimitDirectiveTransformer } =
-        rateLimitDirective({ pointsCalculator });
+      const { rateLimitDirectiveTypeDefs, rateLimitDirectiveTransformer } = rateLimitDirective({
+        pointsCalculator,
+      });
       const schema = rateLimitDirectiveTransformer(
         makeExecutableSchema({
           typeDefs: [
@@ -410,8 +376,9 @@ describe('rateLimitDirective', () => {
         ) => 0,
       );
 
-      const { rateLimitDirectiveTypeDefs, rateLimitDirectiveTransformer } =
-        rateLimitDirective({ pointsCalculator });
+      const { rateLimitDirectiveTypeDefs, rateLimitDirectiveTransformer } = rateLimitDirective({
+        pointsCalculator,
+      });
       const schema = rateLimitDirectiveTransformer(
         makeExecutableSchema({
           typeDefs: [
@@ -446,8 +413,7 @@ describe('rateLimitDirective', () => {
           isFirstInDuration: false,
         });
 
-      const { rateLimitDirectiveTypeDefs, rateLimitDirectiveTransformer } =
-        rateLimitDirective();
+      const { rateLimitDirectiveTypeDefs, rateLimitDirectiveTransformer } = rateLimitDirective();
       const schema = rateLimitDirectiveTransformer(
         makeExecutableSchema({
           typeDefs: [
@@ -461,18 +427,13 @@ describe('rateLimitDirective', () => {
         }),
       );
 
-      const response = await graphql(
-        schema,
-        'query { firstQuote: quote secondQuote: quote }',
-      );
+      const response = await graphql(schema, 'query { firstQuote: quote secondQuote: quote }');
 
       expect(limiterConsume).toHaveBeenCalledTimes(2);
       expect(limiterConsume).toHaveBeenCalledWith('Query.quote', 1);
 
       const error = getError(response);
-      expect(error.message).toMatch(
-        /Too many requests, please try again in \d+ seconds\./,
-      );
+      expect(error.message).toMatch(/Too many requests, please try again in \d+ seconds\./);
       expect(error.path).toEqual([expect.any(String)]);
     });
 
@@ -494,12 +455,12 @@ describe('rateLimitDirective', () => {
           context: Record<string, unknown>,
           info: GraphQLResolveInfo,
           /* eslint-enable @typescript-eslint/no-unused-vars */
-        ) =>
-          'So comes snow after fire, and even dragons have their endings. ― Bilbo Baggins',
+        ) => 'So comes snow after fire, and even dragons have their endings. ― Bilbo Baggins',
       );
 
-      const { rateLimitDirectiveTypeDefs, rateLimitDirectiveTransformer } =
-        rateLimitDirective({ onLimit });
+      const { rateLimitDirectiveTypeDefs, rateLimitDirectiveTransformer } = rateLimitDirective({
+        onLimit,
+      });
       const schema = rateLimitDirectiveTransformer(
         makeExecutableSchema({
           typeDefs: [

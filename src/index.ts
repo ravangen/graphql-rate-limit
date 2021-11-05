@@ -94,10 +94,7 @@ export interface RateLimitOptions<TContext> {
    */
   limiterOptions?: Pick<
     IRateLimiterOptions,
-    Exclude<
-      keyof IRateLimiterOptions,
-      keyof { points?: number; duration?: number }
-    >
+    Exclude<keyof IRateLimiterOptions, keyof { points?: number; duration?: number }>
   >;
 }
 
@@ -173,9 +170,7 @@ export function defaultOnLimit<TContext>(
   /* eslint-enable @typescript-eslint/no-unused-vars */
 ): unknown {
   throw new GraphQLError(
-    `Too many requests, please try again in ${Math.ceil(
-      resource.msBeforeNext / 1000,
-    )} seconds.`,
+    `Too many requests, please try again in ${Math.ceil(resource.msBeforeNext / 1000)} seconds.`,
   );
 }
 
@@ -193,10 +188,7 @@ export function rateLimitDirective<TContext>({
   limiterOptions = {},
 }: RateLimitOptions<TContext> = {}): RateLimitDirective {
   const limiters = new Map<string, RateLimiterAbstract>();
-  const getLimiter = ({
-    limit,
-    duration,
-  }: RateLimitArgs): RateLimiterAbstract => {
+  const getLimiter = ({ limit, duration }: RateLimitArgs): RateLimiterAbstract => {
     const limiterKey = `${limit}/${duration}s`;
     let limiter = limiters.get(limiterKey);
     if (limiter === undefined) {
@@ -213,29 +205,14 @@ export function rateLimitDirective<TContext>({
     }
     return limiter;
   };
-  const rateLimit = (
-    directive: Record<string, unknown>,
-    field: GraphQLFieldUnion,
-  ): void => {
+  const rateLimit = (directive: Record<string, unknown>, field: GraphQLFieldUnion): void => {
     const directiveArgs = directive as RateLimitArgs;
     const limiter = getLimiter(directiveArgs);
     const { resolve = defaultFieldResolver } = field;
     field.resolve = async (source, args, context: TContext, info) => {
-      const pointsToConsume = await pointsCalculator(
-        directiveArgs,
-        source,
-        args,
-        context,
-        info,
-      );
+      const pointsToConsume = await pointsCalculator(directiveArgs, source, args, context, info);
       if (pointsToConsume !== 0) {
-        const key = await keyGenerator(
-          directiveArgs,
-          source,
-          args,
-          context,
-          info,
-        );
+        const key = await keyGenerator(directiveArgs, source, args, context, info);
         try {
           await limiter.consume(key, pointsToConsume);
         } catch (e) {
@@ -282,17 +259,8 @@ directive @${name}(
           }
           return type;
         },
-        [MapperKind.OBJECT_FIELD]: (
-          fieldConfig,
-          fieldName,
-          typeName,
-          schema,
-        ) => {
-          const rateLimitDirective = getDirective(
-            schema,
-            fieldConfig,
-            name,
-          )?.[0];
+        [MapperKind.OBJECT_FIELD]: (fieldConfig, fieldName, typeName, schema) => {
+          const rateLimitDirective = getDirective(schema, fieldConfig, name)?.[0];
           if (rateLimitDirective) {
             rateLimit(rateLimitDirective, fieldConfig);
           }
