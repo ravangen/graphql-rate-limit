@@ -105,7 +105,13 @@ export interface RateLimitOptions<TContext> {
  * Implementation of a rate limit schema directive.
  */
 export interface RateLimitDirective {
+  /**
+   * Schema Definition Language (SDL) representation of the directive.
+   */
   rateLimitDirectiveTypeDefs: string;
+  /**
+   * Function to apply the directive's logic to the provided schema.
+   */
   rateLimitDirectiveTransformer: (schema: GraphQLSchema) => GraphQLSchema;
 }
 
