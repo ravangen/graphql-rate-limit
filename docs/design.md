@@ -18,7 +18,7 @@ To apply multiple rate limits on the same field, multiple directives would need 
 
 > Directives are used to describe some metadata or behavioral change on the definition they apply to. When more than one directive of the same name is used, the expected metadata or behavior becomes ambiguous, therefore only one of each directive is allowed per location.
 
- In newer versions of the spec, being unique per location is no longer required. However, this library continues to assume there not multiple rate limit directives with the same name on the same field.
+In newer versions of the spec, being unique per location is no longer required. However, this library continues to assume there not multiple rate limit directives with the same name on the same field.
 
 ### GraphQL Middleware
 
