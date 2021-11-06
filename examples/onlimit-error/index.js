@@ -1,37 +1,16 @@
-const { ApolloServer, gql } = require('apollo-server');
-const {
-  createRateLimitDirective,
-  createRateLimitTypeDef,
-} = require('graphql-rate-limit-directive');
+const { makeExecutableSchema } = require('@graphql-tools/schema');
+const express = require('express');
+const { graphqlHTTP } = require('express-graphql');
+const { rateLimitDirective } = require('graphql-rate-limit-directive');
+const { RateLimiterMemory } = require('rate-limiter-flexible');
 
-const typeDefs = gql`
-  # Allow each field to be queried once every 15 seconds
-  type Query @rateLimit(limit: 1, duration: 15) {
-    books: [Book!]
-    quote: String
+// This is not necessary, it exists to demonstrate when we check the rate limit usage
+class DebugRateLimiterMemory extends RateLimiterMemory {
+  consume(key, pointsToConsume, options) {
+    console.log(`[CONSUME] ${key} for ${pointsToConsume}`);
+    return super.consume(key, pointsToConsume, options);
   }
-
-  type Book {
-    title: String
-    author: String
-  }
-`;
-const resolvers = {
-  Query: {
-    books: () => [
-      {
-        title: 'A Game of Thrones',
-        author: 'George R. R. Martin',
-      },
-      {
-        title: 'The Hobbit',
-        author: 'J. R. R. Tolkien',
-      },
-    ],
-    quote: () =>
-      'The future is something which everyone reaches at the rate of sixty minutes an hour, whatever he does, whoever he is. ― C.S. Lewis',
-  },
-};
+}
 
 class RateLimitError extends Error {
   constructor(msBeforeNextReset) {
@@ -51,24 +30,72 @@ class RateLimitError extends Error {
 }
 
 // IMPORTANT: Specify how a rate limited field should behave when a limit has been exceeded
-const onLimit = (resource, directiveArgs, obj, args, context, info) => {
+const onLimit = (resource, directiveArgs, source, args, context, info) => {
   throw new RateLimitError(resource.msBeforeNext);
 };
 
-const server = new ApolloServer({
-  typeDefs: [createRateLimitTypeDef(), typeDefs],
-  resolvers,
-  schemaDirectives: {
-    rateLimit: createRateLimitDirective({
-      onLimit,
-    }),
-  },
+const { rateLimitDirectiveTypeDefs, rateLimitDirectiveTransformer } = rateLimitDirective({
+  onLimit,
+  limiterClass: DebugRateLimiterMemory
 });
-server
-  .listen()
-  .then(({ url }) => {
-    console.log(`🚀  Server ready at ${url}`);
-  })
-  .catch(error => {
-    console.error(error);
-  });
+
+const resolvers = {
+  Query: {
+    books: () => [
+      {
+        title: 'A Game of Thrones',
+        author: 'George R. R. Martin',
+      },
+      {
+        title: 'The Hobbit',
+        author: 'J. R. R. Tolkien',
+      },
+    ],
+    quote: () =>
+      'The future is something which everyone reaches at the rate of sixty minutes an hour, whatever he does, whoever he is. ― C.S. Lewis',
+  },
+};
+let schema = makeExecutableSchema({
+  typeDefs: [
+    rateLimitDirectiveTypeDefs,
+    `# Allow each field to be queried once every 15 seconds
+    type Query @rateLimit(limit: 1, duration: 15) {
+      books: [Book!]
+      quote: String
+    }
+
+    type Book {
+      title: String
+      author: String
+    }`,
+  ],
+  resolvers,
+});
+schema = rateLimitDirectiveTransformer(schema);
+
+const app = express();
+app.use(
+  '/graphql',
+  graphqlHTTP((request) => {
+    return {
+      schema,
+      graphiql: {
+        defaultQuery: `# Welcome to GraphiQL
+#
+# Allow each field to be queried once every 15 seconds.
+# Repeated requests within this time window will raise a custom error.
+
+query {
+  quote
+  books {
+    title
+    author
+  }
+}`
+      },
+    };
+  }),
+);
+app.listen(4000, () => {
+  console.log(`🚀  Server ready at http://localhost:4000/graphql`);
+});
