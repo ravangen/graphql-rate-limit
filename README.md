@@ -98,29 +98,12 @@ Additional, advanced examples are available in the [examples](examples) folder:
 - [onLimit Object](examples/onlimit-object): custom result instead of default resolution
 
 ```javascript
-const { ApolloServer, gql } = require('apollo-server');
-const {
-  createRateLimitDirective,
-  createRateLimitTypeDef,
-} = require('graphql-rate-limit-directive');
+const { makeExecutableSchema } = require('@graphql-tools/schema');
+const { ApolloServer } = require('apollo-server');
+const { ApolloServerPluginLandingPageGraphQLPlayground } = require('apollo-server-core');
+const { rateLimitDirective } = require('graphql-rate-limit-directive');
 
-const typeDefs = gql`
-  # Apply default rate limiting to all fields of 'Query'
-  type Query @rateLimit {
-    books: [Book!]
-
-    # Override behaviour imposed from 'Query' object on this field to have a custom limit
-    quote: String @rateLimit(limit: 1)
-  }
-
-  type Book {
-    # For each 'Book' where this field is requested, rate limit
-    title: String @rateLimit(limit: 72000, duration: 3600)
-
-    # No limits are applied
-    author: String
-  }
-`;
+const { rateLimitDirectiveTypeDefs, rateLimitDirectiveTransformer } = rateLimitDirective();
 
 const resolvers = {
   Query: {
@@ -138,22 +121,38 @@ const resolvers = {
       'The future is something which everyone reaches at the rate of sixty minutes an hour, whatever he does, whoever he is. ― C.S. Lewis',
   },
 };
+let schema = makeExecutableSchema({
+  typeDefs: [
+    rateLimitDirectiveTypeDefs,
+    `# Apply default rate limiting to all fields of 'Query'
+    type Query @rateLimit(limit: 1, duration: 15) {
+      books: [Book!]
+
+      # Override behaviour imposed from 'Query' object on this field to have a custom limit
+      quote: String @rateLimit(limit: 1)
+    }
+
+    type Book {
+      # For each 'Book' where this field is requested, apply a rate limit
+      title: String @rateLimit(limit: 72000, duration: 3600)
+
+      # No limits are applied
+      author: String
+    }`,
+  ],
+  resolvers,
+});
+schema = rateLimitDirectiveTransformer(schema);
 
 const server = new ApolloServer({
-  typeDefs: [createRateLimitTypeDef(), typeDefs],
-  resolvers,
-  schemaDirectives: {
-    rateLimit: createRateLimitDirective(),
-  },
+  schema,
+  plugins: [
+    ApolloServerPluginLandingPageGraphQLPlayground(),
+  ]
 });
-server
-  .listen()
-  .then(({ url }) => {
-    console.log(`🚀  Server ready at ${url}`);
-  })
-  .catch(error => {
-    console.error(error);
-  });
+server.listen().then(({ url }) => {
+  console.log(`🚀  Server ready at ${url}`);
+});
 ```
 
 ## API
