@@ -22,16 +22,16 @@ yarn install
 node index.js
 ```
 
-#### Step 2: Open Playground
+#### Step 2: Open GraphiQL
 
-Navigate to [`http://localhost:4000/`](http://localhost:4000/) in a browser.
+Navigate to [`http://localhost:4000/graphql`](http://localhost:4000/graphql) in a browser.
 
 #### Step 3: Execute GraphQL operations
 
 Server is configured to allow the following queries:
 
 - `quote`: 10 times every 30 seconds (due to `defaultPointsCalculator`)
-- `books`: 5 times every 30 seconds (due to cost of `2`) or unlimited times when the GraphQL API endpoint includes query string `token=secret` (**within** Playground, change the URL to `http://localhost:4000/?token=secret`)
+- `books`: 5 times every 30 seconds (due to cost of `2`) or unlimited times when the GraphQL API endpoint includes query string `token=secret` (e.g. `http://localhost:4000/graphql?token=secret`)
 
 Sample query:
 
@@ -40,6 +40,7 @@ Sample query:
   quote
   books {
     title
+    author
   }
 }
 ```

@@ -1,13 +1,12 @@
 import {
   defaultFieldResolver,
-  DocumentNode,
   GraphQLError,
   GraphQLField,
-  GraphQLObjectType,
+  GraphQLFieldConfig,
   GraphQLResolveInfo,
+  GraphQLSchema,
 } from 'graphql';
-import gql from 'graphql-tag';
-import { SchemaDirectiveVisitor } from '@graphql-tools/utils';
+import { getDirective, mapSchema, MapperKind } from '@graphql-tools/utils';
 import {
   IRateLimiterOptions,
   RateLimiterAbstract,
@@ -15,10 +14,14 @@ import {
   RateLimiterRes,
 } from 'rate-limiter-flexible';
 
+type GraphQLFieldUnion =
+  | GraphQLField<unknown, unknown, { [key: string]: unknown }>
+  | GraphQLFieldConfig<unknown, unknown, { [argName: string]: unknown }>;
+
 /**
  * Configure rate limit field behaviour.
  */
-export interface RateLimitArgs {
+export type RateLimitArgs = {
   /**
    * Number of occurrences allowed over duration.
    */
@@ -27,11 +30,11 @@ export interface RateLimitArgs {
    * Number of seconds before limit is reset.
    */
   duration: number;
-}
+};
 
 export type RateLimitKeyGenerator<TContext> = (
   directiveArgs: RateLimitArgs,
-  obj: unknown,
+  source: unknown,
   args: { [key: string]: unknown },
   context: TContext,
   info: GraphQLResolveInfo,
@@ -39,7 +42,7 @@ export type RateLimitKeyGenerator<TContext> = (
 
 export type RateLimitPointsCalculator<TContext> = (
   directiveArgs: RateLimitArgs,
-  obj: unknown,
+  source: unknown,
   args: { [key: string]: unknown },
   context: TContext,
   info: GraphQLResolveInfo,
@@ -48,7 +51,7 @@ export type RateLimitPointsCalculator<TContext> = (
 export type RateLimitOnLimit<TContext> = (
   resource: RateLimiterRes,
   directiveArgs: RateLimitArgs,
-  obj: unknown,
+  source: unknown,
   args: { [key: string]: unknown },
   context: TContext,
   info: GraphQLResolveInfo,
@@ -57,7 +60,19 @@ export type RateLimitOnLimit<TContext> = (
 /**
  * Configure rate limit behaviour.
  */
-export interface IOptions<TContext> {
+export interface RateLimitOptions<TContext> {
+  /**
+   * Name of the directive.
+   */
+  name?: string;
+  /**
+   * Default value for argument limit.
+   */
+  defaultLimit?: string;
+  /**
+   * Default value for argument duration.
+   */
+  defaultDuration?: string;
   /**
    * Constructs a key to represent an operation on a field.
    */
@@ -79,24 +94,35 @@ export interface IOptions<TContext> {
    */
   limiterOptions?: Pick<
     IRateLimiterOptions,
-    Exclude<
-      keyof IRateLimiterOptions,
-      keyof { points?: number; duration?: number }
-    >
+    Exclude<keyof IRateLimiterOptions, keyof { points?: number; duration?: number }>
   >;
+}
+
+/**
+ * Implementation of a rate limit schema directive.
+ */
+export interface RateLimitDirective {
+  /**
+   * Schema Definition Language (SDL) representation of the directive.
+   */
+  rateLimitDirectiveTypeDefs: string;
+  /**
+   * Function to apply the directive's logic to the provided schema.
+   */
+  rateLimitDirectiveTransformer: (schema: GraphQLSchema) => GraphQLSchema;
 }
 
 /**
  * Get a value to uniquely identify a field in a schema.
  * @param directiveArgs The arguments defined in the schema for the directive.
- * @param obj The previous result returned from the resolver on the parent field.
+ * @param source The previous result returned from the resolver on the parent field.
  * @param args The arguments provided to the field in the GraphQL operation.
  * @param context Contains per-request state shared by all resolvers in a particular operation.
  * @param info Holds field-specific information relevant to the current operation as well as the schema details.
  */
 export function defaultKeyGenerator<TContext>(
   directiveArgs: RateLimitArgs,
-  obj: unknown,
+  source: unknown,
   args: { [key: string]: unknown },
   context: TContext,
   info: GraphQLResolveInfo,
@@ -107,7 +133,7 @@ export function defaultKeyGenerator<TContext>(
 /**
  * Calculate the number of points to consume.
  * @param directiveArgs The arguments defined in the schema for the directive.
- * @param obj The previous result returned from the resolver on the parent field.
+ * @param source The previous result returned from the resolver on the parent field.
  * @param args The arguments provided to the field in the GraphQL operation.
  * @param context Contains per-request state shared by all resolvers in a particular operation.
  * @param info Holds field-specific information relevant to the current operation as well as the schema details.
@@ -115,7 +141,7 @@ export function defaultKeyGenerator<TContext>(
 export function defaultPointsCalculator<TContext>(
   /* eslint-disable @typescript-eslint/no-unused-vars */
   directiveArgs: RateLimitArgs,
-  obj: unknown,
+  source: unknown,
   args: { [key: string]: unknown },
   context: TContext,
   info: GraphQLResolveInfo,
@@ -128,7 +154,7 @@ export function defaultPointsCalculator<TContext>(
  * Raise a rate limit error when there are too many requests.
  * @param resource The current rate limit information for this field.
  * @param directiveArgs The arguments defined in the schema for the directive.
- * @param obj The previous result returned from the resolver on the parent field.
+ * @param source The previous result returned from the resolver on the parent field.
  * @param args The arguments provided to the field in the GraphQL operation.
  * @param context Contains per-request state shared by all resolvers in a particular operation.
  * @param info Holds field-specific information relevant to the current operation as well as the schema details.
@@ -137,149 +163,109 @@ export function defaultOnLimit<TContext>(
   resource: RateLimiterRes,
   /* eslint-disable @typescript-eslint/no-unused-vars */
   directiveArgs: RateLimitArgs,
-  obj: unknown,
+  source: unknown,
   args: { [key: string]: unknown },
   context: TContext,
   info: GraphQLResolveInfo,
   /* eslint-enable @typescript-eslint/no-unused-vars */
 ): unknown {
   throw new GraphQLError(
-    `Too many requests, please try again in ${Math.ceil(
-      resource.msBeforeNext / 1000,
-    )} seconds.`,
+    `Too many requests, please try again in ${Math.ceil(resource.msBeforeNext / 1000)} seconds.`,
   );
-}
-
-/**
- * Create a GraphQL directive type definition.
- * @param directiveName Name of the directive
- */
-export function createRateLimitTypeDef(
-  directiveName = 'rateLimit',
-): DocumentNode {
-  return gql`
-  """
-  Controls the rate of traffic.
-  """
-  directive @${directiveName}(
-    """
-    Number of occurrences allowed over duration.
-    """
-    limit: Int! = 60
-
-    """
-    Number of seconds before limit is reset.
-    """
-    duration: Int! = 60
-  ) on OBJECT | FIELD_DEFINITION
-`;
 }
 
 /**
  * Create an implementation of a rate limit directive.
  */
-export function createRateLimitDirective<TContext>({
+export function rateLimitDirective<TContext>({
+  name = 'rateLimit',
+  defaultLimit = '60',
+  defaultDuration = '60',
   keyGenerator = defaultKeyGenerator,
   pointsCalculator = defaultPointsCalculator,
   onLimit = defaultOnLimit,
   limiterClass = RateLimiterMemory,
   limiterOptions = {},
-}: IOptions<TContext> = {}): typeof SchemaDirectiveVisitor {
+}: RateLimitOptions<TContext> = {}): RateLimitDirective {
   const limiters = new Map<string, RateLimiterAbstract>();
-  const limiterKeyGenerator = ({ limit, duration }: RateLimitArgs): string =>
-    `${limit}/${duration}s`;
-
-  return class extends SchemaDirectiveVisitor {
-    // Use createRateLimitTypeDef until graphql-tools fixes getDirectiveDeclaration
-    // public static getDirectiveDeclaration(
-    //   directiveName: string,
-    //   schema: GraphQLSchema,
-    // ): GraphQLDirective | null | undefined {
-    //   return new GraphQLDirective({
-    //     name: directiveName,
-    //     description: 'Controls the rate of traffic.',
-    //     locations: [
-    //       DirectiveLocation.FIELD_DEFINITION,
-    //       DirectiveLocation.OBJECT,
-    //     ],
-    //     args: {
-    //       limit: {
-    //         type: GraphQLNonNull(GraphQLInt),
-    //         defaultValue: 60,
-    //         description: 'Number of occurrences allowed over duration.',
-    //       },
-    //       duration: {
-    //         type: GraphQLNonNull(GraphQLInt),
-    //         defaultValue: 60,
-    //         description: 'Number of seconds before limit is reset.',
-    //       },
-    //     },
-    //   });
-    // }
-
-    visitObject(object: GraphQLObjectType) {
-      // Wrap fields for limiting that don't have their own @rateLimit
-      const fields = object.getFields();
-      Object.values(fields).forEach((field) => {
-        if (!field.astNode) return;
-        const directives = field.astNode.directives;
-        if (
-          !directives ||
-          !directives.some((directive) => directive.name.value === this.name)
-        ) {
-          this.rateLimit(field);
-        }
+  const getLimiter = ({ limit, duration }: RateLimitArgs): RateLimiterAbstract => {
+    const limiterKey = `${limit}/${duration}s`;
+    let limiter = limiters.get(limiterKey);
+    if (limiter === undefined) {
+      limiter = new limiterClass({
+        ...limiterOptions,
+        keyPrefix:
+          limiterOptions.keyPrefix === undefined
+            ? name // change the default behaviour which is to use 'rlflx'
+            : limiterOptions.keyPrefix,
+        points: limit,
+        duration: duration,
       });
+      limiters.set(limiterKey, limiter);
     }
-
-    visitFieldDefinition(field: GraphQLField<unknown, TContext>) {
-      this.rateLimit(field);
-    }
-
-    private getLimiter(): RateLimiterAbstract {
-      const limiterKey = limiterKeyGenerator(this.args);
-      let limiter = limiters.get(limiterKey);
-      if (limiter === undefined) {
-        limiter = new limiterClass({
-          ...limiterOptions,
-          keyPrefix:
-            limiterOptions.keyPrefix === undefined
-              ? this.name // change the default behaviour which is to use 'rlflx'
-              : limiterOptions.keyPrefix,
-          points: this.args.limit,
-          duration: this.args.duration,
-        });
-        limiters.set(limiterKey, limiter);
-      }
-      return limiter;
-    }
-
-    private rateLimit(field: GraphQLField<unknown, TContext>) {
-      const { resolve = defaultFieldResolver } = field;
-      const limiter = this.getLimiter();
-      field.resolve = async (obj, args, context, info) => {
-        const pointsToConsume = await pointsCalculator(
-          this.args,
-          obj,
-          args,
-          context,
-          info,
-        );
-        if (pointsToConsume !== 0) {
-          const key = await keyGenerator(this.args, obj, args, context, info);
-          try {
-            await limiter.consume(key, pointsToConsume);
-          } catch (e) {
-            if (e instanceof Error) {
-              throw e;
-            }
-
-            const resource = e as RateLimiterRes;
-            return onLimit(resource, this.args, obj, args, context, info);
+    return limiter;
+  };
+  const rateLimit = (directive: Record<string, unknown>, field: GraphQLFieldUnion): void => {
+    const directiveArgs = directive as RateLimitArgs;
+    const limiter = getLimiter(directiveArgs);
+    const { resolve = defaultFieldResolver } = field;
+    field.resolve = async (source, args, context: TContext, info) => {
+      const pointsToConsume = await pointsCalculator(directiveArgs, source, args, context, info);
+      if (pointsToConsume !== 0) {
+        const key = await keyGenerator(directiveArgs, source, args, context, info);
+        try {
+          await limiter.consume(key, pointsToConsume);
+        } catch (e) {
+          if (e instanceof Error) {
+            throw e;
           }
+
+          const resource = e as RateLimiterRes;
+          return onLimit(resource, directiveArgs, source, args, context, info);
         }
-        return resolve.apply(this, [obj, args, context, info]);
-      };
-    }
+      }
+      return resolve(source, args, context, info);
+    };
+  };
+
+  return {
+    rateLimitDirectiveTypeDefs: `"""
+Controls the rate of traffic.
+"""
+directive @${name}(
+  """
+  Number of occurrences allowed over duration.
+  """
+  limit: Int! = ${defaultLimit}
+
+  """
+  Number of seconds before limit is reset.
+  """
+  duration: Int! = ${defaultDuration}
+) on OBJECT | FIELD_DEFINITION`,
+    rateLimitDirectiveTransformer: (schema: GraphQLSchema) =>
+      mapSchema(schema, {
+        [MapperKind.OBJECT_TYPE]: (type, schema) => {
+          const rateLimitDirective = getDirective(schema, type, name)?.[0];
+          if (rateLimitDirective) {
+            // Wrap fields of object for limiting that don't have their own directive applied
+            const fields = type.getFields();
+            Object.values(fields).forEach((field) => {
+              const overrideDirective = getDirective(schema, field, name);
+              if (overrideDirective === undefined) {
+                rateLimit(rateLimitDirective, field);
+              }
+            });
+          }
+          return type;
+        },
+        [MapperKind.OBJECT_FIELD]: (fieldConfig, fieldName, typeName, schema) => {
+          const rateLimitDirective = getDirective(schema, fieldConfig, name)?.[0];
+          if (rateLimitDirective) {
+            rateLimit(rateLimitDirective, fieldConfig);
+          }
+          return fieldConfig;
+        },
+      }),
   };
 }

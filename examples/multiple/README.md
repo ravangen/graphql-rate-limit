@@ -10,7 +10,7 @@ Multiple schema directives can be created using different names and assigned to 
 
 ### Unique Directives
 
-As of the June 2018 version of the GraphQL specification, [Directives Are Unique Per Location](https://facebook.github.io/graphql/June2018/#sec-Directives-Are-Unique-Per-Location). A spec [RFC to "Limit directive uniqueness to explicitly marked directives"](https://github.com/facebook/graphql/pull/472) is currently at [Stage 2: Draft](https://github.com/facebook/graphql/blob/master/CONTRIBUTING.md#stage-2-draft). As a result, multiple `@rateLimit` directives can not be defined on the same location. Instead we create multiple directives with different names.
+As of the June 2018 version of the GraphQL specification, [Directives Are Unique Per Location](http://spec.graphql.org/June2018/#sec-Directives-Are-Unique-Per-Location). In newer versions of the spec, being unique per location is no longer required. However, this library continues to assume there not multiple rate limit directives with the same name on the same field.
 
 ## Setup
 
@@ -28,18 +28,20 @@ yarn install
 node index.js
 ```
 
-#### Step 2: Open Playground
+#### Step 2: Open GraphiQL
 
-Navigate to [`http://localhost:4000/`](http://localhost:4000/) in a browser.
+Navigate to [`http://localhost:4000/graphql`](http://localhost:4000/graphql) in a browser.
 
 #### Step 3: Execute GraphQL operations
 
-Server is configured to allow `books` to be queried once every 15 seconds and three times every 60 seconds. Sample query:
+Server is configured to allow each root field to be queried once every 15 seconds and three times every 60 seconds. Sample query:
 
 ```graphql
 {
+  quote
   books {
     title
+    author
   }
 }
 ```

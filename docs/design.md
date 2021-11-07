@@ -14,9 +14,11 @@ Directives and their arguments are exposed via introspection, enabling client to
 
 Custom directives are now easy to create and define on the server, but early in [graphql-js's history (#41)](https://github.com/graphql/graphql-js/issues/41#issuecomment-130554729), user-supplied directives were not an objective.
 
-To apply multiple rate limits on the same field, multiple directives would need to be defined as [Directives Are Unique Per Location](https://facebook.github.io/graphql/June2018/#sec-Directives-Are-Unique-Per-Location).
+To apply multiple rate limits on the same field, multiple directives would need to be defined as [Directives Are Unique Per Location](http://spec.graphql.org/June2018/#sec-Directives-Are-Unique-Per-Location).
 
 > Directives are used to describe some metadata or behavioral change on the definition they apply to. When more than one directive of the same name is used, the expected metadata or behavior becomes ambiguous, therefore only one of each directive is allowed per location.
+
+In newer versions of the spec, being unique per location is no longer required. However, this library continues to assume there not multiple rate limit directives with the same name on the same field.
 
 ### GraphQL Middleware
 

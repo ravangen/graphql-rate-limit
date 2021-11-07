@@ -1,3 +1,36 @@
+## 2.0.0 - 2021-11-07
+
+- Update dependencies, minimum `graphql-tools` version is now `8`
+- `IOptions` renamed to `RateLimitOptions`, adds `name`, `defaultLimit`, `defaultDuration` optional arguments.
+
+### Version 2 Migration
+
+Due to interface changes with `graphql-tools`, the approach to setting up the directive has changed:
+
+```diff
+const { makeExecutableSchema } = require('@graphql-tools/schema');
+const {
+- createRateLimitDirective,
+- createRateLimitTypeDef,
++ rateLimitDirective
+} = require('graphql-rate-limit-directive');
+
++ const { rateLimitDirectiveTypeDefs, rateLimitDirectiveTransformer } = rateLimitDirective();
+
+let schema = makeExecutableSchema({
+  typeDefs: [
+-   createRateLimitTypeDef(),
++   rateLimitDirectiveTypeDefs,
+    /* other defs */
+  ],
+  resolvers,
+- schemaDirectives: {
+-   rateLimit: createRateLimitDirective(),
+- },
+});
++ schema = rateLimitDirectiveTransformer(schema);
+```
+
 ## 1.3.0 – 2021-04-01
 
 - Update dependencies, minimum `GraphQL.js` version is now `15`

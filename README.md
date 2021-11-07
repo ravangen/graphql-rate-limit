@@ -4,8 +4,7 @@
 [![Codecov](https://img.shields.io/codecov/c/github/ravangen/graphql-rate-limit.svg?style=popout)](https://codecov.io/gh/ravangen/graphql-rate-limit)
 [![npm Version](https://img.shields.io/npm/v/graphql-rate-limit-directive.svg?style=popout)](https://www.npmjs.com/package/graphql-rate-limit-directive)
 [![npm Downloads](https://img.shields.io/npm/dm/graphql-rate-limit-directive.svg?style=popout)](https://www.npmjs.com/package/graphql-rate-limit-directive)
-[![Dependency Status](https://david-dm.org/ravangen/graphql-rate-limit/status.svg)](https://david-dm.org/ravangen/graphql-rate-limit)
-[![Development Dependency Status](https://david-dm.org/ravangen/graphql-rate-limit/dev-status.png)](https://david-dm.org/ravangen/graphql-rate-limit#info=devDependencies)
+[![Dependency Status](https://img.shields.io/librariesio/github/ravangen/graphql-rate-limit)](https://github.com/ravangen/graphql-rate-limit/pulls/app%2Frenovate)
 
 Fixed window rate limiting directive for GraphQL. Use to limit repeated requests to queries and mutations.
 
@@ -27,35 +26,41 @@ yarn add graphql-rate-limit-directive
 
 GraphQL Rate Limit wraps resolvers, ensuring an action is permitted before it is invoked. A client is allocated a maximum of `n` operations for every fixed size time window. Once the client has performed `n` operations, they must wait.
 
-### Usage
+## Setup
 
-#### Step 1: Include directive type definition
+### Step 1: Define directive type definition and transformer
 
-Include `createRateLimitTypeDef()` as part of the schema's type definitions.
-
-```javascript
-const schema = makeExecutableSchema({
-  typeDefs: [createRateLimitTypeDef(), typeDefs],
-  ...
-});
-```
-
-#### Step 2: Include directive implementation
-
-Include `createRateLimitDirective()` as part of the schema's directives. This implementes the `@rateLimit` functionality.
+Import `rateLimitDirective` and configure behaviour of directive (see [options](#ratelimitdirectiveoptions)).
 
 ```javascript
-const schema = makeExecutableSchema({
-  schemaDirectives: {
-    rateLimit: createRateLimitDirective(),
-  },
-  ...
-});
+const { rateLimitDirective } = require('graphql-rate-limit-directive');
+
+const { rateLimitDirectiveTypeDefs, rateLimitDirectiveTransformer } = rateLimitDirective();
 ```
 
-#### Step 3: Attach directive to field or object
+### Step 2: Add directive to schema
 
-Attach `@rateLimit` directive. Argument `limit` is number of allow operations per duration. Argument `duration` is the length of the fixed window (in seconds).
+Include `rateLimitDirectiveTypeDefs` as part of the schema's type definitions.
+
+Transform schema with `rateLimitDirectiveTransformer` to apply implementation of directive.
+
+```javascript
+const { makeExecutableSchema } = require('@graphql-tools/schema');
+
+let schema = makeExecutableSchema({
+  typeDefs: [
+    rateLimitDirectiveTypeDefs,
+    /* plus any existing type definitions */
+  ],
+  /* ... */
+});
+
+schema = rateLimitDirectiveTransformer(schema);
+```
+
+### Step 3: Attach directive to field or object
+
+Attach `@rateLimit` directive where desired. Argument `limit` is number of allow operations per duration. Argument `duration` is the length of the fixed window (in seconds).
 
 ```graphql
 # Apply rate limiting to all fields of 'Query'
@@ -81,7 +86,7 @@ type Query @rateLimit(limit: 60, duration: 60) {
 }
 ```
 
-### Example
+## Example
 
 Additional, advanced examples are available in the [examples](examples) folder:
 
@@ -93,29 +98,12 @@ Additional, advanced examples are available in the [examples](examples) folder:
 - [onLimit Object](examples/onlimit-object): custom result instead of default resolution
 
 ```javascript
-const { ApolloServer, gql } = require('apollo-server');
-const {
-  createRateLimitDirective,
-  createRateLimitTypeDef,
-} = require('graphql-rate-limit-directive');
+const { makeExecutableSchema } = require('@graphql-tools/schema');
+const { ApolloServer } = require('apollo-server');
+const { ApolloServerPluginLandingPageGraphQLPlayground } = require('apollo-server-core');
+const { rateLimitDirective } = require('graphql-rate-limit-directive');
 
-const typeDefs = gql`
-  # Apply default rate limiting to all fields of 'Query'
-  type Query @rateLimit {
-    books: [Book!]
-
-    # Override behaviour imposed from 'Query' object on this field to have a custom limit
-    quote: String @rateLimit(limit: 1)
-  }
-
-  type Book {
-    # For each 'Book' where this field is requested, rate limit
-    title: String @rateLimit(limit: 72000, duration: 3600)
-
-    # No limits are applied
-    author: String
-  }
-`;
+const { rateLimitDirectiveTypeDefs, rateLimitDirectiveTransformer } = rateLimitDirective();
 
 const resolvers = {
   Query: {
@@ -133,37 +121,71 @@ const resolvers = {
       'The future is something which everyone reaches at the rate of sixty minutes an hour, whatever he does, whoever he is. ― C.S. Lewis',
   },
 };
+let schema = makeExecutableSchema({
+  typeDefs: [
+    rateLimitDirectiveTypeDefs,
+    `# Apply default rate limiting to all fields of 'Query'
+    type Query @rateLimit(limit: 1, duration: 15) {
+      books: [Book!]
+
+      # Override behaviour imposed from 'Query' object on this field to have a custom limit
+      quote: String @rateLimit(limit: 1)
+    }
+
+    type Book {
+      # For each 'Book' where this field is requested, apply a rate limit
+      title: String @rateLimit(limit: 72000, duration: 3600)
+
+      # No limits are applied
+      author: String
+    }`,
+  ],
+  resolvers,
+});
+schema = rateLimitDirectiveTransformer(schema);
 
 const server = new ApolloServer({
-  typeDefs: [createRateLimitTypeDef(), typeDefs],
-  resolvers,
-  schemaDirectives: {
-    rateLimit: createRateLimitDirective(),
-  },
+  schema,
+  plugins: [
+    ApolloServerPluginLandingPageGraphQLPlayground(),
+  ]
 });
-server
-  .listen()
-  .then(({ url }) => {
-    console.log(`🚀  Server ready at ${url}`);
-  })
-  .catch(error => {
-    console.error(error);
-  });
+server.listen().then(({ url }) => {
+  console.log(`🚀  Server ready at ${url}`);
+});
 ```
 
 ## API
 
-### `createRateLimitDirective(options?)`
+### `rateLimitDirective(options)`
 
 > Create an implementation of a rate limit directive.
 
-#### `options`
+It is common to specify at least [`keyGenerator`](#keyGenerator) and [`limiterClass`](#limiterClass) as part of `options`.
 
-> Configure rate limit behaviour.
+Returns an object containing:
+- `rateLimitDirectiveTypeDefs`: Schema Definition Language (SDL) representation of the directive.
+- `rateLimitDirectiveTransformer`: Function to apply the directive's logic to the provided schema.
 
-It is common to specify at least [`keyGenerator`](#keyGenerator) and [`limiterClass`](#limiterClass).
+#### `name`
 
-##### `keyGenerator`
+> Name of the directive.
+
+Override the name of the directive, defaults to `rateLimit`.
+
+#### `defaultLimit`
+
+> Default value for argument limit.
+
+Override the directive's `limit` argument's default value, defaults to `60`.
+
+#### `defaultDuration`
+
+> Default value for argument duration.
+
+Override the directive's `duration` argument's default value, defaults to `60`.
+
+#### `keyGenerator`
 
 > Constructs a key to represent an operation on a field.
 
@@ -173,7 +195,7 @@ By default, it does _not_ provide user or client independent rate limiting. See 
 
 **WARNING**: Inside a generator function, consider accessing the GraphQL `context` or memoizing any expensive calls (HTTP, database, ...) as the functions is run for each rate limited field.
 
-##### `limiterClass`
+#### `limiterClass`
 
 > An implementation of a limiter.
 
@@ -183,13 +205,13 @@ Supports [_Redis_](https://github.com/animir/node-rate-limiter-flexible/wiki/Red
 
 Memory store is the default but _not_ recommended for production as it does not share state with other servers or processes. See [Redis example](examples/redis) for use in a distributed environment.
 
-##### `limiterOptions`
+#### `limiterOptions`
 
 > Configuration to apply to created limiters.
 
 **WARNING**: If providing the `keyPrefix` option, consider using directive's name as part of the prefix to ensure isolation between different directives.
 
-##### `pointsCalculator`
+#### `pointsCalculator`
 
 > Calculate the number of points to consume.
 
@@ -199,23 +221,13 @@ Default with [`defaultPointsCalculator`](#defaultpointscalculatordirectiveargs-o
 - A zero skips consuming points (like a whitelist).
 - A negative number increases the available points for consumption for one duration.
 
-##### `onLimit`
+#### `onLimit`
 
 > Behaviour when limit is exceeded.
 
 Throw an error or return an object describing a reached limit and when it will reset. Default is to throw an error using [`defaultOnLimit`](#defaultonlimitresource-directiveargs-obj-args-context-info). See [error example](examples/onlimit-error) and [object example](examples/onlimit-object).
 
-### `createRateLimitTypeDef(directiveName?)`
-
-> Create a GraphQL directive type definition.
-
-`graphql-js` >= 14 requires you to define your directives in your schema, before you attempt to use them. This generates the directive to be placed in your schema type definitions.
-
-#### `directiveName`
-
-Name of the directive to create.
-
-### `defaultKeyGenerator(directiveArgs, obj, args, context, info)`
+### `defaultKeyGenerator(directiveArgs, source, args, context, info)`
 
 > Get a value to uniquely identify a field in a schema.
 
@@ -227,7 +239,7 @@ This function can be used in conjunction with `context` information to ensure us
 
 The arguments defined in the schema for the directive.
 
-#### `obj`
+#### `source`
 
 The previous result returned from the resolver on the parent field.
 
@@ -243,7 +255,7 @@ Contains per-request state shared by all resolvers in a particular operation.
 
 Holds field-specific information relevant to the current operation as well as the schema details.
 
-### `defaultPointsCalculator(directiveArgs, obj, args, context, info)`
+### `defaultPointsCalculator(directiveArgs, source, args, context, info)`
 
 > Calculate the number of points to consume.
 
@@ -253,7 +265,7 @@ Cost one point.
 
 The arguments defined in the schema for the directive.
 
-#### `obj`
+#### `source`
 
 The previous result returned from the resolver on the parent field.
 
@@ -269,7 +281,7 @@ Contains per-request state shared by all resolvers in a particular operation.
 
 Holds field-specific information relevant to the current operation as well as the schema details.
 
-### `defaultOnLimit(resource, directiveArgs, obj, args, context, info)`
+### `defaultOnLimit(resource, directiveArgs, source, args, context, info)`
 
 > Raise a rate limit error when there are too many requests.
 
@@ -283,7 +295,7 @@ The current rate limit information for this field.
 
 The arguments defined in the schema for the directive.
 
-#### `obj`
+#### `source`
 
 The previous result returned from the resolver on the parent field.
 
@@ -307,4 +319,4 @@ If you are using this package and fixed a bug for yourself, please consider subm
 
 ## License
 
-MIT © [Robert Van Gennip](https://github.com/ravangen/)
+MIT © [Rob Van Gennip](https://github.com/ravangen/)

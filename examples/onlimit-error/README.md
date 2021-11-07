@@ -22,13 +22,13 @@ yarn install
 node index.js
 ```
 
-#### Step 2: Open Playground
+#### Step 2: Open GraphiQL
 
-Navigate to [`http://localhost:4000/`](http://localhost:4000/) in a browser.
+Navigate to [`http://localhost:4000/graphql`](http://localhost:4000/graphql) in a browser.
 
 #### Step 3: Execute GraphQL operations
 
-Server is configured to allow each field to be queried once every 15 seconds.
+Server is configured to allow each root field to be queried once every 15 seconds.
 
 Sample query:
 
@@ -37,6 +37,7 @@ Sample query:
   quote
   books {
     title
+    author
   }
 }
 ```
@@ -47,51 +48,35 @@ Sample rate limited response:
 {
   "errors": [
     {
-      "message": "Too many requests, please try again shortly",
+      "message": "Too many requests, please try again shortly.",
       "locations": [
         {
-          "line": 2,
+          "line": 7,
           "column": 3
         }
       ],
-      "path": ["quote"],
+      "path": [
+        "quote"
+      ],
       "extensions": {
         "code": "RATE_LIMITED",
-        "resetAt": "2019-02-03T19:34:16.164Z",
-        "exception": {
-          "stacktrace": [
-            "Error: Too many requests, please try again shortly.",
-            "    at onLimit (/Users/user/graphql-rate-limit/examples/onlimit-error/index.js:57:9)",
-            "    at Object.<anonymous> (/Users/user/graphql-rate-limit/examples/onlimit-error/node_modules/graphql-rate-limit-directive/dist/index.js:106:28)",
-            "    at Generator.throw (<anonymous>)",
-            "    at rejected (/Users/user/graphql-rate-limit/examples/onlimit-error/node_modules/graphql-rate-limit-directive/dist/index.js:5:65)",
-            "    at process._tickCallback (internal/process/next_tick.js:68:7)"
-          ]
-        }
+        "resetAt": "2019-02-03T19:34:16.164Z"
       }
     },
     {
       "message": "Too many requests, please try again shortly.",
       "locations": [
         {
-          "line": 3,
+          "line": 8,
           "column": 3
         }
       ],
-      "path": ["books"],
+      "path": [
+        "books"
+      ],
       "extensions": {
         "code": "RATE_LIMITED",
-        "resetAt": "2019-02-03T19:34:16.163Z",
-        "exception": {
-          "stacktrace": [
-            "Error: Too many requests, please try again shortly",
-            "    at onLimit (/Users/user/graphql-rate-limit/examples/onlimit-error/index.js:57:9)",
-            "    at Object.<anonymous> (/Users/user/graphql-rate-limit/examples/onlimit-error/node_modules/graphql-rate-limit-directive/dist/index.js:106:28)",
-            "    at Generator.throw (<anonymous>)",
-            "    at rejected (/Users/user/graphql-rate-limit/examples/onlimit-error/node_modules/graphql-rate-limit-directive/dist/index.js:5:65)",
-            "    at process._tickCallback (internal/process/next_tick.js:68:7)"
-          ]
-        }
+        "resetAt": "2019-02-03T19:34:16.163Z"
       }
     }
   ],

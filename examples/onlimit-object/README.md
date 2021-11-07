@@ -24,9 +24,9 @@ yarn install
 node index.js
 ```
 
-#### Step 2: Open Playground
+#### Step 2: Open GraphiQL
 
-Navigate to [`http://localhost:4000/`](http://localhost:4000/) in a browser.
+Navigate to [`http://localhost:4000/graphql`](http://localhost:4000/graphql) in a browser.
 
 #### Step 3: Execute GraphQL operations
 
@@ -40,6 +40,7 @@ Sample query:
     __typename
     ... on Book {
       title
+      author
     }
     ... on RateLimit {
       limit
