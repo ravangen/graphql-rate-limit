@@ -55,19 +55,20 @@ REDIS_PASSWORD=MySecretString
 node index.js
 ```
 
-#### Step 2: Open Playground
+#### Step 2: Open GraphiQL
 
-Navigate to [`http://localhost:4000/`](http://localhost:4000/) in a browser.
+Navigate to [`http://localhost:4000/graphql`](http://localhost:4000/graphql) in a browser.
 
 #### Step 3: Execute GraphQL operations
 
-Server is configured to allow each field to be queried once every 15 seconds. Sample query:
+Server is configured to allow each root field to be queried once every 15 seconds. Sample query:
 
 ```graphql
 {
   quote
   books {
     title
+    author
   }
 }
 ```
