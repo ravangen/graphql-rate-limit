@@ -100,7 +100,7 @@ describe('rateLimitDirective', () => {
       }),
     );
 
-    await graphql(schema, 'query { quote }');
+    await graphql({ schema, source: 'query { quote }' });
 
     expect(ranConstructor).toEqual(true);
   });
@@ -148,7 +148,7 @@ describe('rateLimitDirective', () => {
         }),
       );
 
-      const response = await graphql(schema, 'query { quote }');
+      const response = await graphql({ schema, source: 'query { quote }' });
 
       expect(limiterConsume).toHaveBeenCalledTimes(1);
       expect(limiterConsume).toHaveBeenCalledWith('Query.quote', 1);
@@ -173,7 +173,7 @@ describe('rateLimitDirective', () => {
         }),
       );
 
-      const response = await graphql(schema, 'query { books { title } }');
+      const response = await graphql({ schema, source: 'query { books { title } }' });
 
       expect(limiterConsume).toHaveBeenCalledTimes(2);
       expect(limiterConsume).toHaveBeenNthCalledWith(1, 'Book.title', 1);
@@ -200,7 +200,7 @@ describe('rateLimitDirective', () => {
         }),
       );
 
-      const response = await graphql(schema, 'query { quote books { title } }');
+      const response = await graphql({ schema, source: 'query { quote books { title } }' });
 
       expect(limiterConsume).toHaveBeenCalledTimes(2);
       expect(limiterConsume).toHaveBeenCalledWith('Query.quote', 1);
@@ -227,7 +227,7 @@ describe('rateLimitDirective', () => {
         }),
       );
 
-      const response = await graphql(schema, 'query { books { title author } }');
+      const response = await graphql({ schema, source: 'query { books { title author } }' });
 
       expect(limiterConsume).toHaveBeenCalledTimes(4);
       expect(limiterConsume).toHaveBeenCalledWith('Book.title', 1);
@@ -258,7 +258,7 @@ describe('rateLimitDirective', () => {
         }),
       );
 
-      const response = await graphql(schema, 'query { quote }');
+      const response = await graphql({ schema, source: 'query { quote }' });
 
       expect(limiterConsume).toHaveBeenCalledTimes(1);
       expect(limiterConsume).toHaveBeenCalledWith('Query.quote', 1);
@@ -272,7 +272,7 @@ describe('rateLimitDirective', () => {
       interface IContext {
         ip: string;
       }
-      const context: IContext = {
+      const contextValue: IContext = {
         ip: '127.0 0.1',
       };
       const keyGenerator = jest.fn(
@@ -306,13 +306,13 @@ describe('rateLimitDirective', () => {
         }),
       );
 
-      const response = await graphql(schema, 'query { quote }', undefined, context);
+      const response = await graphql({ schema, source: 'query { quote }', contextValue });
 
       expect(keyGenerator).toHaveBeenCalledWith(
         { limit: 10, duration: 300 },
         undefined,
         {},
-        context,
+        contextValue,
         expect.any(Object),
       );
       expect(limiterConsume).toHaveBeenCalledTimes(1);
@@ -349,7 +349,7 @@ describe('rateLimitDirective', () => {
         }),
       );
 
-      const response = await graphql(schema, 'query { quote }');
+      const response = await graphql({ schema, source: 'query { quote }' });
 
       expect(pointsCalculator).toHaveBeenCalledWith(
         { limit: 10, duration: 300 },
@@ -392,7 +392,7 @@ describe('rateLimitDirective', () => {
         }),
       );
 
-      await graphql(schema, 'query { quote }');
+      await graphql({ schema, source: 'query { quote }' });
 
       expect(pointsCalculator).toHaveBeenCalled();
       expect(limiterConsume).not.toHaveBeenCalled();
@@ -427,7 +427,10 @@ describe('rateLimitDirective', () => {
         }),
       );
 
-      const response = await graphql(schema, 'query { firstQuote: quote secondQuote: quote }');
+      const response = await graphql({
+        schema,
+        source: 'query { firstQuote: quote secondQuote: quote }',
+      });
 
       expect(limiterConsume).toHaveBeenCalledTimes(2);
       expect(limiterConsume).toHaveBeenCalledWith('Query.quote', 1);
@@ -474,7 +477,7 @@ describe('rateLimitDirective', () => {
         }),
       );
 
-      const response = await graphql(schema, 'query { quote }');
+      const response = await graphql({ schema, source: 'query { quote }' });
 
       expect(limiterConsume).toHaveBeenCalledTimes(1);
       expect(limiterConsume).toHaveBeenCalledWith('Query.quote', 1);

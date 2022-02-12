@@ -17,7 +17,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "graphql": "^15.0.0",
+    "graphql": "^16.0.0",
     "@graphql-tools/schema": "^8.0.0",
     "@graphql-tools/utils": "^8.0.0",
     "rate-limiter-flexible": "^2.0.0"
