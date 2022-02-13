@@ -14,6 +14,8 @@ import {
   RateLimiterRes,
 } from 'rate-limiter-flexible';
 
+type MaybePromise<T> = Promise<T> | T;
+
 type GraphQLFieldUnion =
   | GraphQLField<unknown, unknown, { [key: string]: unknown }>
   | GraphQLFieldConfig<unknown, unknown, { [argName: string]: unknown }>;
@@ -38,7 +40,7 @@ export type RateLimitKeyGenerator<TContext> = (
   args: { [key: string]: unknown },
   context: TContext,
   info: GraphQLResolveInfo,
-) => Promise<string> | string;
+) => MaybePromise<string>;
 
 export type RateLimitPointsCalculator<TContext> = (
   directiveArgs: RateLimitArgs,
@@ -46,16 +48,25 @@ export type RateLimitPointsCalculator<TContext> = (
   args: { [key: string]: unknown },
   context: TContext,
   info: GraphQLResolveInfo,
-) => Promise<number> | number;
+) => MaybePromise<number>;
 
 export type RateLimitOnLimit<TContext> = (
-  resource: RateLimiterRes,
+  response: RateLimiterRes,
   directiveArgs: RateLimitArgs,
   source: unknown,
   args: { [key: string]: unknown },
   context: TContext,
   info: GraphQLResolveInfo,
-) => unknown;
+) => MaybePromise<unknown>;
+
+export type RateLimitSetState<TContext> = (
+  response: RateLimiterRes,
+  directiveArgs: RateLimitArgs,
+  source: unknown,
+  args: { [key: string]: unknown },
+  context: TContext,
+  info: GraphQLResolveInfo,
+) => void;
 
 /**
  * Configure rate limit behaviour.
@@ -86,6 +97,10 @@ export interface RateLimitOptions<TContext> {
    */
   onLimit?: RateLimitOnLimit<TContext>;
   /**
+   * If rate limiter information for request should be stored in context, how to record it.
+   */
+  setState?: RateLimitSetState<TContext>;
+  /**
    * An implementation of a limiter.
    */
   limiterClass?: typeof RateLimiterAbstract;
@@ -113,6 +128,22 @@ export interface RateLimitDirective {
 }
 
 /**
+ * Convert milliseconds to seconds.
+ * @param duration Milliseconds.
+ */
+export function millisecondsToSeconds(duration: number): number {
+  return Math.ceil(duration / 1000); // round up to over estimate for client
+}
+
+/**
+ * Human readable string that uniquely identifies a schema element within a GraphQL Schema.
+ * @param info Holds field-specific information relevant to the current operation as well as the schema details.
+ */
+export function getSchemaCoordinate(info: GraphQLResolveInfo): string {
+  return `${info.parentType.name}.${info.fieldName}`;
+}
+
+/**
  * Get a value to uniquely identify a field in a schema.
  * @param directiveArgs The arguments defined in the schema for the directive.
  * @param source The previous result returned from the resolver on the parent field.
@@ -127,7 +158,7 @@ export function defaultKeyGenerator<TContext>(
   context: TContext,
   info: GraphQLResolveInfo,
 ): string {
-  return `${info.parentType.name}.${info.fieldName}`;
+  return getSchemaCoordinate(info);
 }
 
 /**
@@ -152,7 +183,7 @@ export function defaultPointsCalculator<TContext>(
 
 /**
  * Raise a rate limit error when there are too many requests.
- * @param resource The current rate limit information for this field.
+ * @param response The current rate limit information for this field.
  * @param directiveArgs The arguments defined in the schema for the directive.
  * @param source The previous result returned from the resolver on the parent field.
  * @param args The arguments provided to the field in the GraphQL operation.
@@ -160,7 +191,7 @@ export function defaultPointsCalculator<TContext>(
  * @param info Holds field-specific information relevant to the current operation as well as the schema details.
  */
 export function defaultOnLimit<TContext>(
-  resource: RateLimiterRes,
+  response: RateLimiterRes,
   /* eslint-disable @typescript-eslint/no-unused-vars */
   directiveArgs: RateLimitArgs,
   source: unknown,
@@ -170,8 +201,25 @@ export function defaultOnLimit<TContext>(
   /* eslint-enable @typescript-eslint/no-unused-vars */
 ): unknown {
   throw new GraphQLError(
-    `Too many requests, please try again in ${Math.ceil(resource.msBeforeNext / 1000)} seconds.`,
+    `Too many requests, please try again in ${millisecondsToSeconds(
+      response.msBeforeNext,
+    )} seconds.`,
   );
+}
+
+/**
+ * Write directive state into context.
+ * @param name Key of rate limit state in context, likely the directive's name.
+ */
+export function defaultSetState<TContext>(name = 'rateLimit'): RateLimitSetState<TContext> {
+  return (response, directiveArgs, source, args, context, info) => {
+    let state = context[name];
+    if (!state) {
+      state = {};
+      context[name] = state;
+    }
+    state[getSchemaCoordinate(info)] = response;
+  };
 }
 
 /**
@@ -184,6 +232,7 @@ export function rateLimitDirective<TContext>({
   keyGenerator = defaultKeyGenerator,
   pointsCalculator = defaultPointsCalculator,
   onLimit = defaultOnLimit,
+  setState,
   limiterClass = RateLimiterMemory,
   limiterOptions = {},
 }: RateLimitOptions<TContext> = {}): RateLimitDirective {
@@ -214,14 +263,16 @@ export function rateLimitDirective<TContext>({
       if (pointsToConsume !== 0) {
         const key = await keyGenerator(directiveArgs, source, args, context, info);
         try {
-          await limiter.consume(key, pointsToConsume);
+          const response = await limiter.consume(key, pointsToConsume);
+          if (setState) setState(response, directiveArgs, source, args, context, info);
         } catch (e) {
           if (e instanceof Error) {
             throw e;
           }
 
-          const resource = e as RateLimiterRes;
-          return onLimit(resource, directiveArgs, source, args, context, info);
+          const response = e as RateLimiterRes;
+          if (setState) setState(response, directiveArgs, source, args, context, info);
+          return onLimit(response, directiveArgs, source, args, context, info);
         }
       }
       return resolve(source, args, context, info);
@@ -243,7 +294,7 @@ directive @${name}(
   """
   duration: Int! = ${defaultDuration}
 ) on OBJECT | FIELD_DEFINITION`,
-    rateLimitDirectiveTransformer: (schema: GraphQLSchema) =>
+    rateLimitDirectiveTransformer: (schema) =>
       mapSchema(schema, {
         [MapperKind.OBJECT_TYPE]: (type, schema) => {
           const rateLimitDirective = getDirective(schema, type, name)?.[0];

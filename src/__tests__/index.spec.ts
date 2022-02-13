@@ -9,7 +9,7 @@ import {
   GraphQLSchema,
 } from 'graphql';
 import { IRateLimiterOptions, RateLimiterMemory, RateLimiterRes } from 'rate-limiter-flexible';
-import { rateLimitDirective, RateLimitArgs } from '../index';
+import { defaultSetState, rateLimitDirective, RateLimitArgs } from '../index';
 
 const getDirective = (schema: GraphQLSchema, name = 'rateLimit'): GraphQLDirective => {
   const directive = schema.getDirectives().find((directive) => directive.name == name);
@@ -269,10 +269,10 @@ describe('rateLimitDirective', () => {
     });
 
     it('uses custom async keyGenerator', async () => {
-      interface IContext {
+      interface Context {
         ip: string;
       }
-      const contextValue: IContext = {
+      const contextValue: Context = {
         ip: '127.0 0.1',
       };
       const keyGenerator = jest.fn(
@@ -281,7 +281,7 @@ describe('rateLimitDirective', () => {
           directiveArgs: RateLimitArgs,
           obj: unknown,
           args: { [key: string]: unknown },
-          context: IContext,
+          context: Context,
           info: GraphQLResolveInfo,
           /* eslint-enable @typescript-eslint/no-unused-vars */
         ) => {
@@ -490,6 +490,52 @@ describe('rateLimitDirective', () => {
         expect.any(Object),
       );
       expect(response).toMatchSnapshot();
+    });
+
+    it('stores state in context', async () => {
+      const directiveName = 'rateLimit';
+      interface Context {
+        [directiveName]?: {
+          [coordinate: string]: RateLimiterRes;
+        };
+      }
+      const contextValue: Context = {};
+
+      const { rateLimitDirectiveTypeDefs, rateLimitDirectiveTransformer } =
+        rateLimitDirective<Context>({
+          setState: defaultSetState(directiveName),
+        });
+      const schema = rateLimitDirectiveTransformer(
+        makeExecutableSchema({
+          typeDefs: [
+            rateLimitDirectiveTypeDefs,
+            `type Query  {
+              books: [Book!]
+              quote: String @rateLimit(limit: 3)
+            }
+            type Book {
+              title: String
+              author: String @rateLimit(limit: 3)
+            }`,
+          ],
+          resolvers,
+          resolverValidationOptions,
+        }),
+      );
+
+      await graphql({ schema, source: 'query { quote books { title author } }', contextValue });
+      const state = contextValue[directiveName];
+
+      expect(state).toEqual({
+        'Query.quote': expect.objectContaining({
+          consumedPoints: 1,
+          remainingPoints: 2,
+        }),
+        'Book.author': expect.objectContaining({
+          consumedPoints: 2,
+          remainingPoints: 1,
+        }),
+      });
     });
   });
 });

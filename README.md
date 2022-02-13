@@ -96,6 +96,7 @@ Additional, advanced examples are available in the [examples](examples) folder:
 - [Multiple](examples/multiple): applying multiple rate limits on the same field
 - [onLimit Error](examples/onlimit-error): custom error raised
 - [onLimit Object](examples/onlimit-object): custom result instead of default resolution
+- [Response Extension](examples/response-extension): rate limit details in response extension
 
 ```javascript
 const { makeExecutableSchema } = require('@graphql-tools/schema');
