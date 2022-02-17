@@ -6,3 +6,10 @@ dist
 npm-debug.log
 package-lock.json
 reports/
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
