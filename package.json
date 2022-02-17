@@ -8,22 +8,21 @@
   "typescript": {
     "definition": "dist/index.d.ts"
   },
-  "packageManager": "yarn@3.1.1",
   "scripts": {
     "build": "rm -rf dist && tsc -d",
     "format": "eslint --fix 'src/**'",
     "ci:format": "eslint 'src/**'",
     "typecheck": "tsc",
-    "lint": "yarn typecheck; yarn format",
+    "lint": "npm run typecheck; npm run format",
     "test": "jest"
   },
-  "dependencies": {
-    "@graphql-tools/schema": "^8.0.0",
+  "peerDependencies": {
     "@graphql-tools/utils": "^8.0.0",
     "graphql": "^16.0.0",
     "rate-limiter-flexible": "^2.0.0"
   },
   "devDependencies": {
+    "@graphql-tools/schema": "^8.0.0",
     "@types/jest": "27.4.0",
     "@types/node": "16.11.24",
     "@typescript-eslint/eslint-plugin": "5.11.0",

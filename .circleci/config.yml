@@ -15,20 +15,19 @@ jobs:
       - checkout
 
       - restore_cache:
-          name: Restore Yarn Package Cache
+          name: Restore package cache
           keys:
-            - yarn-packages-{{ checksum "yarn.lock" }}
+            - npm-packages-{{ checksum "package-lock.json" }}
 
       - run:
-          name: Install Dependencies
-          command: yarn install --immutable
+          name: Install dependencies
+          command: npm install --immutable
 
       - save_cache:
-          name: Save Yarn Package Cache
-          key: yarn-packages-{{ checksum "yarn.lock" }}
+          name: Save package cache
+          key: npm-packages-{{ checksum "package-lock.json" }}
           paths:
-            - .yarn/cache
-            - .yarn/unplugged
+            - node_modules
 
       - persist_to_workspace:
           root: .
@@ -43,7 +42,7 @@ jobs:
 
       - run:
           name: Compile
-          command: yarn build
+          command: npm run build
 
   test:
     executor: default
@@ -55,7 +54,7 @@ jobs:
           name: Test
           command: |
             mkdir -p /tmp/test-reports
-            yarn run test --ci --runInBand --reporters=default --reporters=jest-junit --coverage
+            npm run test --ci --runInBand --reporters=default --reporters=jest-junit --coverage
           environment:
             - JEST_JUNIT_OUTPUT_DIR: ./reports/junit/
 
@@ -73,11 +72,11 @@ jobs:
 
       - run:
           name: Lint
-          command: yarn run ci:format
+          command: npm run ci:format
 
       - run:
           name: Type check
-          command: yarn run typecheck
+          command: npm run typecheck
 
 workflows:
   version: 2
