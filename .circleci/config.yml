@@ -15,26 +15,20 @@ jobs:
       - checkout
 
       - restore_cache:
-          name: Restoring Yarn package cache
-          key: yarn-packages-{{ checksum "yarn.lock" }}
+          name: Restore Yarn Package Cache
+          keys:
+            - yarn-packages-{{ checksum "yarn.lock" }}
 
       - run:
-          name: Setting Yarn offline mirror
-          command: yarn config set yarn-offline-mirror ~/.cache/yarn && yarn config set yarn-offline-mirror-pruning true
-
-      - run:
-          name: Installing dependencies
-          command: yarn install --prefer-offline --frozen-lockfile
+          name: Install Dependencies
+          command: yarn install --immutable
 
       - save_cache:
-          name: Storing Yarn package cache
+          name: Save Yarn Package Cache
           key: yarn-packages-{{ checksum "yarn.lock" }}
           paths:
-            - ~/.cache/yarn
-
-      - run:
-          name: Checking dependency integrity
-          command: yarn check --integrity --verify-tree
+            - .yarn/cache
+            - .yarn/unplugged
 
       - persist_to_workspace:
           root: .
@@ -58,7 +52,7 @@ jobs:
           at: .
 
       - run:
-          name: Running tests
+          name: Test
           command: |
             mkdir -p /tmp/test-reports
             yarn run test --ci --runInBand --reporters=default --reporters=jest-junit --coverage
@@ -78,11 +72,11 @@ jobs:
           at: .
 
       - run:
-          name: Linting
+          name: Lint
           command: yarn run ci:format
 
       - run:
-          name: Type checking
+          name: Type check
           command: yarn run typecheck
 
 workflows:
