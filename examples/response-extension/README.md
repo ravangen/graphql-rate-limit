@@ -41,3 +41,35 @@ Server is configured to allow each root field to be queried three times every 15
   }
 }
 ```
+
+Example response:
+
+```json
+{
+  "data": {
+    "quote": "The future is something which everyone reaches at the rate of sixty minutes an hour, whatever he does, whoever he is. ― C.S. Lewis",
+    "books": [
+      {
+        "title": "A Game of Thrones"
+      },
+      {
+        "title": "The Hobbit"
+      }
+    ]
+  },
+  "extensions": {
+    "rateLimit": {
+      "Query.quote": {
+        "remaining": 2,
+        "consumed": 1,
+        "resets": 15
+      },
+      "Query.books": {
+        "remaining": 2,
+        "consumed": 1,
+        "resets": 15
+      }
+    }
+  }
+}
+```

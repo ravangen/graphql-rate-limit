@@ -2,7 +2,7 @@ const { makeExecutableSchema } = require('@graphql-tools/schema');
 const express = require('express');
 const { graphqlHTTP } = require('express-graphql');
 const {
-  defaultGetState,
+  defaultSetState,
   millisecondsToSeconds,
   rateLimitDirective
 } = require('graphql-rate-limit-directive');
@@ -17,13 +17,12 @@ class DebugRateLimiterMemory extends RateLimiterMemory {
 }
 
 const directiveName = 'rateLimit';
-const getState = defaultGetState(directiveName);
 const {
   rateLimitDirectiveTypeDefs,
   rateLimitDirectiveTransformer,
 } = rateLimitDirective({
   name: directiveName,
-  getState, // IMPORTANT: Where to store the request's rate limit state in context
+  setState: defaultSetState(directiveName), // IMPORTANT: Where to store the request's rate limit state in context
   limiterClass: DebugRateLimiterMemory
 });
 
@@ -69,8 +68,8 @@ app.use(
       schema,
       extensions: (info) => {
         // IMPORTANT: Fetch the request's rate limit state from context
-        const state = getState(info.context);
-        return {
+        const state = info.context[directiveName];
+        return { // Format state to desired output structure
           [directiveName]: Object.entries(state).reduce((accumulator, [coordinate, response]) => {
             accumulator[coordinate] = {
               remaining: response.remainingPoints,
