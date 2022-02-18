@@ -71,7 +71,7 @@ export type RateLimitSetState<TContext> = (
 /**
  * Configure rate limit behaviour.
  */
-export interface RateLimitOptions<TContext> {
+export interface RateLimitOptions<TContext, TLimiterOptions extends IRateLimiterOptions> {
   /**
    * Name of the directive.
    */
@@ -108,8 +108,8 @@ export interface RateLimitOptions<TContext> {
    * Configuration to apply to created limiters.
    */
   limiterOptions?: Pick<
-    IRateLimiterOptions,
-    Exclude<keyof IRateLimiterOptions, keyof { points?: number; duration?: number }>
+    TLimiterOptions,
+    Exclude<keyof TLimiterOptions, keyof { points?: number; duration?: number }>
   >;
 }
 
@@ -225,7 +225,10 @@ export function defaultSetState<TContext>(name = 'rateLimit'): RateLimitSetState
 /**
  * Create an implementation of a rate limit directive.
  */
-export function rateLimitDirective<TContext>({
+export function rateLimitDirective<
+  TContext,
+  TLimiterOptions extends IRateLimiterOptions = IRateLimiterOptions,
+>({
   name = 'rateLimit',
   defaultLimit = '60',
   defaultDuration = '60',
@@ -234,8 +237,8 @@ export function rateLimitDirective<TContext>({
   onLimit = defaultOnLimit,
   setState,
   limiterClass = RateLimiterMemory,
-  limiterOptions = {},
-}: RateLimitOptions<TContext> = {}): RateLimitDirective {
+  limiterOptions = <TLimiterOptions>{},
+}: RateLimitOptions<TContext, TLimiterOptions> = {}): RateLimitDirective {
   const limiters = new Map<string, RateLimiterAbstract>();
   const getLimiter = ({ limit, duration }: RateLimitArgs): RateLimiterAbstract => {
     const limiterKey = `${limit}/${duration}s`;
