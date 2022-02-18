@@ -228,6 +228,14 @@ Default with [`defaultPointsCalculator`](#defaultpointscalculatordirectiveargs-o
 
 Throw an error or return an object describing a reached limit and when it will reset. Default is to throw an error using [`defaultOnLimit`](#defaultonlimitresource-directiveargs-obj-args-context-info). See [error example](examples/onlimit-error) and [object example](examples/onlimit-object).
 
+#### `setState`
+
+> If rate limiter information for request should be stored in context, how to record it.
+
+When provided, puts the rate limit information for the current operation into `context`.
+
+Can be used to include formatted rate limit information in a response's `extensions`, see [example](examples/response-extension).
+
 ### `defaultKeyGenerator(directiveArgs, source, args, context, info)`
 
 > Get a value to uniquely identify a field in a schema.
