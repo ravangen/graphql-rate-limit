@@ -226,7 +226,7 @@ Default with [`defaultPointsCalculator`](#defaultpointscalculatordirectiveargs-o
 
 > Behaviour when limit is exceeded.
 
-Throw an error or return an object describing a reached limit and when it will reset. Default is to throw an error using [`defaultOnLimit`](#defaultonlimitresource-directiveargs-obj-args-context-info). See [error example](examples/onlimit-error) and [object example](examples/onlimit-object).
+Throw an error or return an object describing a reached limit and when it will reset. Default is to throw an error using [`defaultOnLimit`](#defaultonlimitresponse-directiveargs-obj-args-context-info). See [error example](examples/onlimit-error) and [object example](examples/onlimit-object).
 
 #### `setState`
 
@@ -290,13 +290,13 @@ Contains per-request state shared by all resolvers in a particular operation.
 
 Holds field-specific information relevant to the current operation as well as the schema details.
 
-### `defaultOnLimit(resource, directiveArgs, source, args, context, info)`
+### `defaultOnLimit(response, directiveArgs, source, args, context, info)`
 
 > Raise a rate limit error when there are too many requests.
 
 Throws a `GraphQLError` with message `Too many requests, please try again in N seconds.`
 
-#### `resource`
+#### `response`
 
 The current rate limit information for this field.
 
@@ -319,6 +319,16 @@ Contains per-request state shared by all resolvers in a particular operation.
 #### `info`
 
 Holds field-specific information relevant to the current operation as well as the schema details.
+
+### `defaultSetState(name)`
+
+> Write directive state into context.
+
+How to store the latest rate limit response in `context`, using schema coordinates.
+
+#### `name`
+
+> Name of the directive.
 
 ## Contributions
 
