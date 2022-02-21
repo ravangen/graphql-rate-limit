@@ -17,6 +17,7 @@ class DebugRateLimiterMemory extends RateLimiterMemory {
 const pointsCalculator = (directiveArgs, source, args, context, info) => {
   // If a specific resolver for a type and field, use custom logic
   if (info.parentType.name === 'Query' && info.fieldName === 'books') {
+    // An alternative way to accomplish this is with field extensions, see other example!
     // When query string `token=secret` is used, allow unlimited usage, else costs 2 for `books`
     return context.requestQuery && context.requestQuery.token === 'secret' ? 0 : 2;
   } else {
