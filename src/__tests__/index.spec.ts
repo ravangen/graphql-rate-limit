@@ -11,6 +11,8 @@ import {
 import { IRateLimiterOptions, RateLimiterMemory, RateLimiterRes } from 'rate-limiter-flexible';
 import { defaultSetState, rateLimitDirective, RateLimitArgs } from '../index';
 
+type TestContext = Record<string, unknown>;
+
 const getDirective = (schema: GraphQLSchema, name = 'rateLimit'): GraphQLDirective => {
   const directive = schema.getDirectives().find((directive) => directive.name == name);
   expect(directive).toBeDefined();
@@ -268,7 +270,7 @@ describe('rateLimitDirective', () => {
       expect(error.path).toEqual(['quote']);
     });
 
-    it('uses custom async keyGenerator', async () => {
+    it('uses custom keyGenerator', async () => {
       interface Context {
         ip: string;
       }
@@ -327,7 +329,7 @@ describe('rateLimitDirective', () => {
           directiveArgs: RateLimitArgs,
           obj: unknown,
           args: { [key: string]: unknown },
-          context: Record<string, unknown>,
+          context: TestContext,
           info: GraphQLResolveInfo,
           /* eslint-enable @typescript-eslint/no-unused-vars */
         ) => 2,
@@ -370,7 +372,7 @@ describe('rateLimitDirective', () => {
           directiveArgs: RateLimitArgs,
           obj: unknown,
           args: { [key: string]: unknown },
-          context: Record<string, unknown>,
+          context: TestContext,
           info: GraphQLResolveInfo,
           /* eslint-enable @typescript-eslint/no-unused-vars */
         ) => 0,
@@ -455,7 +457,7 @@ describe('rateLimitDirective', () => {
           directiveArgs: RateLimitArgs,
           obj: unknown,
           args: { [key: string]: unknown },
-          context: Record<string, unknown>,
+          context: TestContext,
           info: GraphQLResolveInfo,
           /* eslint-enable @typescript-eslint/no-unused-vars */
         ) => 'So comes snow after fire, and even dragons have their endings. ― Bilbo Baggins',
@@ -535,6 +537,211 @@ describe('rateLimitDirective', () => {
           consumedPoints: 2,
           remainingPoints: 1,
         }),
+      });
+    });
+
+    describe('field extension override', () => {
+      const directiveName = 'rateLimit';
+      const resolvers = {
+        Query: {
+          quote: {
+            resolve: () =>
+              'The future is something which everyone reaches at the rate of sixty minutes an hour, whatever he does, whoever he is. ― C.S. Lewis',
+            extensions: {},
+          },
+        },
+      };
+
+      it('uses custom keyGenerator', async () => {
+        const keyGenerator = jest.fn(
+          (
+            /* eslint-disable @typescript-eslint/no-unused-vars */
+            directiveArgs: RateLimitArgs,
+            obj: unknown,
+            args: { [key: string]: unknown },
+            context: TestContext,
+            info: GraphQLResolveInfo,
+            /* eslint-enable @typescript-eslint/no-unused-vars */
+          ) => {
+            // This could be sync, but that case is widely tested already so force this to return a Promise
+            return Promise.resolve(`CUSTOM:${info.parentType}.${info.fieldName}`);
+          },
+        );
+        const { rateLimitDirectiveTypeDefs, rateLimitDirectiveTransformer } =
+          rateLimitDirective<TestContext>({
+            name: directiveName,
+          });
+        resolvers.Query.quote.extensions[directiveName] = {
+          keyGenerator,
+        };
+
+        const schema = rateLimitDirectiveTransformer(
+          makeExecutableSchema({
+            typeDefs: [
+              rateLimitDirectiveTypeDefs,
+              `type Query {
+                quote: String @rateLimit(limit: 10, duration: 300)
+              }`,
+            ],
+            resolvers,
+            resolverValidationOptions,
+          }),
+        );
+
+        const response = await graphql({ schema, source: 'query { quote }' });
+
+        expect(keyGenerator).toHaveBeenCalledWith(
+          { limit: 10, duration: 300 },
+          undefined,
+          {},
+          undefined,
+          expect.any(Object),
+        );
+        expect(limiterConsume).toHaveBeenCalledTimes(1);
+        expect(limiterConsume).toHaveBeenCalledWith('CUSTOM:Query.quote', 1);
+        expect(response).toMatchSnapshot();
+      });
+
+      it('uses custom pointsCalculator', async () => {
+        const pointsCalculator = jest.fn(
+          (
+            /* eslint-disable @typescript-eslint/no-unused-vars */
+            directiveArgs: RateLimitArgs,
+            obj: unknown,
+            args: { [key: string]: unknown },
+            context: TestContext,
+            info: GraphQLResolveInfo,
+            /* eslint-enable @typescript-eslint/no-unused-vars */
+          ) => 2,
+        );
+        const { rateLimitDirectiveTypeDefs, rateLimitDirectiveTransformer } =
+          rateLimitDirective<TestContext>({
+            name: directiveName,
+          });
+        resolvers.Query.quote.extensions[directiveName] = {
+          pointsCalculator,
+        };
+
+        const schema = rateLimitDirectiveTransformer(
+          makeExecutableSchema({
+            typeDefs: [
+              rateLimitDirectiveTypeDefs,
+              `type Query {
+                quote: String @rateLimit(limit: 10, duration: 300)
+              }`,
+            ],
+            resolvers,
+            resolverValidationOptions,
+          }),
+        );
+
+        const response = await graphql({ schema, source: 'query { quote }' });
+
+        expect(pointsCalculator).toHaveBeenCalledWith(
+          { limit: 10, duration: 300 },
+          undefined,
+          {},
+          undefined,
+          expect.any(Object),
+        );
+        expect(limiterConsume).toHaveBeenCalledTimes(1);
+        expect(limiterConsume).toHaveBeenCalledWith('Query.quote', 2);
+        expect(response).toMatchSnapshot();
+      });
+
+      it('uses custom onLimit', async () => {
+        const consumeResponse = <RateLimiterRes>{
+          msBeforeNext: 1250,
+          remainingPoints: 0,
+          consumedPoints: 10,
+          isFirstInDuration: false,
+        };
+        limiterConsume.mockRejectedValue(consumeResponse);
+        const onLimit = jest.fn(
+          (
+            /* eslint-disable @typescript-eslint/no-unused-vars */
+            resource: RateLimiterRes,
+            directiveArgs: RateLimitArgs,
+            obj: unknown,
+            args: { [key: string]: unknown },
+            context: TestContext,
+            info: GraphQLResolveInfo,
+            /* eslint-enable @typescript-eslint/no-unused-vars */
+          ) => 'So comes snow after fire, and even dragons have their endings. ― Bilbo Baggins',
+        );
+        const { rateLimitDirectiveTypeDefs, rateLimitDirectiveTransformer } =
+          rateLimitDirective<TestContext>({
+            name: directiveName,
+          });
+        resolvers.Query.quote.extensions[directiveName] = {
+          onLimit,
+        };
+
+        const schema = rateLimitDirectiveTransformer(
+          makeExecutableSchema({
+            typeDefs: [
+              rateLimitDirectiveTypeDefs,
+              `type Query {
+                quote: String @rateLimit(limit: 10, duration: 300)
+              }`,
+            ],
+            resolvers,
+            resolverValidationOptions,
+          }),
+        );
+
+        const response = await graphql({ schema, source: 'query { quote }' });
+
+        expect(limiterConsume).toHaveBeenCalledTimes(1);
+        expect(limiterConsume).toHaveBeenCalledWith('Query.quote', 1);
+        expect(onLimit).toHaveBeenCalledWith(
+          consumeResponse,
+          { limit: 10, duration: 300 },
+          undefined,
+          {},
+          undefined,
+          expect.any(Object),
+        );
+        expect(response).toMatchSnapshot();
+      });
+
+      it('stores state in context', async () => {
+        interface Context {
+          [directiveName]?: {
+            [coordinate: string]: RateLimiterRes;
+          };
+        }
+        const contextValue: Context = {};
+        const { rateLimitDirectiveTypeDefs, rateLimitDirectiveTransformer } =
+          rateLimitDirective<Context>({
+            name: directiveName,
+          });
+        resolvers.Query.quote.extensions[directiveName] = {
+          setState: defaultSetState(directiveName),
+        };
+
+        const schema = rateLimitDirectiveTransformer(
+          makeExecutableSchema({
+            typeDefs: [
+              rateLimitDirectiveTypeDefs,
+              `type Query {
+                quote: String @rateLimit(limit: 10, duration: 300)
+              }`,
+            ],
+            resolvers,
+            resolverValidationOptions,
+          }),
+        );
+
+        await graphql({ schema, source: 'query { quote }', contextValue });
+        const state = contextValue[directiveName];
+
+        expect(state).toEqual({
+          'Query.quote': expect.objectContaining({
+            consumedPoints: 1,
+            remainingPoints: 9,
+          }),
+        });
       });
     });
   });

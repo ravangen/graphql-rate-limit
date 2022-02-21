@@ -14,6 +14,7 @@ import {
   RateLimiterRes,
 } from 'rate-limiter-flexible';
 
+type Maybe<T> = T | null | undefined;
 type MaybePromise<T> = Promise<T> | T;
 
 type GraphQLFieldUnion =
@@ -32,6 +33,28 @@ export type RateLimitArgs = {
    * Number of seconds before limit is reset.
    */
   duration: number;
+};
+
+/**
+ * Override specific aspects of rate limit field behaviour.
+ */
+export type RateLimitExtensions<TContext> = {
+  /**
+   * Constructs a key to represent an operation on the field.
+   */
+  keyGenerator?: RateLimitKeyGenerator<TContext>;
+  /**
+   * Calculate the number of points to consume.
+   */
+  pointsCalculator?: RateLimitPointsCalculator<TContext>;
+  /**
+   * Behaviour when limit is exceeded.
+   */
+  onLimit?: RateLimitOnLimit<TContext>;
+  /**
+   * If rate limiter information for request should be stored in context, how to record it.
+   */
+  setState?: RateLimitSetState<TContext>;
 };
 
 export type RateLimitKeyGenerator<TContext> = (
@@ -260,22 +283,37 @@ export function rateLimitDirective<
   const rateLimit = (directive: Record<string, unknown>, field: GraphQLFieldUnion): void => {
     const directiveArgs = directive as RateLimitArgs;
     const limiter = getLimiter(directiveArgs);
-    const { resolve = defaultFieldResolver } = field;
+    const { extensions: fieldExtensions, resolve = defaultFieldResolver } = field;
+    const directiveExtensions = fieldExtensions
+      ? <Maybe<RateLimitExtensions<TContext>>>fieldExtensions[name]
+      : undefined;
+    const {
+      keyGenerator: fieldKeyGenerator = keyGenerator,
+      pointsCalculator: fieldPointsCalculator = pointsCalculator,
+      onLimit: fieldOnLimit = onLimit,
+      setState: fieldSetState = setState,
+    } = directiveExtensions ?? {};
     field.resolve = async (source, args, context: TContext, info) => {
-      const pointsToConsume = await pointsCalculator(directiveArgs, source, args, context, info);
+      const pointsToConsume = await fieldPointsCalculator(
+        directiveArgs,
+        source,
+        args,
+        context,
+        info,
+      );
       if (pointsToConsume !== 0) {
-        const key = await keyGenerator(directiveArgs, source, args, context, info);
+        const key = await fieldKeyGenerator(directiveArgs, source, args, context, info);
         try {
           const response = await limiter.consume(key, pointsToConsume);
-          if (setState) setState(response, directiveArgs, source, args, context, info);
+          if (fieldSetState) fieldSetState(response, directiveArgs, source, args, context, info);
         } catch (e) {
           if (e instanceof Error) {
             throw e;
           }
 
           const response = e as RateLimiterRes;
-          if (setState) setState(response, directiveArgs, source, args, context, info);
-          return onLimit(response, directiveArgs, source, args, context, info);
+          if (fieldSetState) fieldSetState(response, directiveArgs, source, args, context, info);
+          return fieldOnLimit(response, directiveArgs, source, args, context, info);
         }
       }
       return resolve(source, args, context, info);
