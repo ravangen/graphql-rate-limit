@@ -14,6 +14,7 @@ Fixed window rate limiting directive for GraphQL. Use to limit repeated requests
 - 🎯 [**Per-Object or Per-Field**](#step-3-attach-directive-to-field-or-object): Limit by objects and specific fields
 - 📦 [**Storage**](#limiterclass): Supports multiple data store choices (_Redis_, process _Memory_, ...)
 - ♾️ [**Throttles**](examples/multiple): Define any number of limits per field
+- ⚙️ **Extensions**: Granular customization of [field](examples/field-extension/) and [response](examples/response-extension/) behaviour
 - 😍 **TypeScript**: Written in and exports type definitions
 
 ## Install
@@ -96,6 +97,7 @@ Additional, advanced examples are available in the [examples](examples) folder:
 - [Multiple](examples/multiple): applying multiple rate limits on the same field
 - [onLimit Error](examples/onlimit-error): custom error raised
 - [onLimit Object](examples/onlimit-object): custom result instead of default resolution
+- [Field Extension](examples/field-extension): override behaviour per field using extensions
 - [Response Extension](examples/response-extension): rate limit details in response extension
 
 ```javascript

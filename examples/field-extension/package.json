@@ -1,0 +1,13 @@
+{
+  "name": "field-extension",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "@graphql-tools/schema": "8.3.1",
+    "express": "4.17.1",
+    "express-graphql": "0.12.0",
+    "graphql": "15.7.2",
+    "graphql-rate-limit-directive": "../../dist",
+    "rate-limiter-flexible": "2.3.3"
+  }
+}
