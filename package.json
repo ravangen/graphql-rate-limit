@@ -22,7 +22,7 @@
     "rate-limiter-flexible": "^2.0.0"
   },
   "devDependencies": {
-    "@graphql-tools/schema": "8.3.1",
+    "@graphql-tools/schema": "9.0.4",
     "@types/jest": "29.2.0",
     "@types/node": "18.11.3",
     "@typescript-eslint/eslint-plugin": "5.40.1",
