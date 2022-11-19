@@ -3,12 +3,12 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
-    "@graphql-tools/schema": "8.3.1",
-    "@graphql-tools/utils": "8.6.1",
-    "express": "4.17.3",
+    "@graphql-tools/schema": "9.0.10",
+    "@graphql-tools/utils": "9.1.1",
+    "express": "4.18.2",
     "express-graphql": "0.12.0",
     "graphql": "16.3.0",
-    "graphql-rate-limit-directive": "2.0.2",
-    "rate-limiter-flexible": "2.3.6"
+    "graphql-rate-limit-directive": "2.0.3",
+    "rate-limiter-flexible": "2.4.1"
   }
 }
