@@ -1,3 +1,7 @@
+## 2.0.3 - 2022-11-19
+
+- Update dependencies
+
 ## 2.0.2 - 2022-02-21
 
 - Add support of field `extensions` to enable granular directive customization per field.
