@@ -221,7 +221,7 @@ Memory store is the default but _not_ recommended for production as it does not 
 Default with [`defaultPointsCalculator`](#defaultpointscalculatordirectiveargs-obj-args-context-info) is to cost one point.
 
 - A positve number reduces the remaining points for consumption for one duration.
-- A zero skips consuming points (like a whitelist).
+- A zero skips consuming points (like an allowlist).
 - A negative number increases the available points for consumption for one duration.
 
 #### `onLimit`
