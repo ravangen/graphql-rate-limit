@@ -6,7 +6,7 @@ executors:
       - image: cimg/node:18.16.1
 
 orbs:
-  codecov: codecov/codecov@3.2.4
+  codecov: codecov/codecov@3.2.5
 
 jobs:
   setup:
