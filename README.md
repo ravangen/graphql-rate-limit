@@ -23,6 +23,12 @@ Fixed window rate limiting directive for GraphQL. Use to limit repeated requests
 yarn add graphql-rate-limit-directive
 ```
 
+You must also install peer dependencies:
+
+```bash
+yarn add rate-limiter-flexible graphql @graphql-tools/utils
+```
+
 ## How it works
 
 GraphQL Rate Limit wraps resolvers, ensuring an action is permitted before it is invoked. A client is allocated a maximum of `n` operations for every fixed size time window. Once the client has performed `n` operations, they must wait.
