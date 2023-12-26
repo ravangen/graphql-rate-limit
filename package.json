@@ -1,7 +1,7 @@
 {
   "name": "graphql-rate-limit-directive",
   "description": "Fixed window rate-limiting directive for GraphQL. Use to limit repeated requests to queries and mutations.",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "license": "MIT",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -19,7 +19,7 @@
   "peerDependencies": {
     "@graphql-tools/utils": "^8.0.0 || ^9.0.0 || ^10.0.0",
     "graphql": "^16.0.0",
-    "rate-limiter-flexible": "^2.0.0"
+    "rate-limiter-flexible": "^2.0.0 || ^3.0.0 || ^4.0.0"
   },
   "devDependencies": {
     "@graphql-tools/schema": "10.0.2",
