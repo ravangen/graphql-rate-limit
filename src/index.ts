@@ -212,6 +212,7 @@ export function defaultPointsCalculator<TContext>(
  * @param args The arguments provided to the field in the GraphQL operation.
  * @param context Contains per-request state shared by all resolvers in a particular operation.
  * @param info Holds field-specific information relevant to the current operation as well as the schema details.
+ * @param errorMessage Override the default error message.
  */
 export function defaultOnLimit<TContext>(
   response: RateLimiterRes,
@@ -221,9 +222,10 @@ export function defaultOnLimit<TContext>(
   args: { [key: string]: unknown },
   context: TContext,
   info: GraphQLResolveInfo,
+  errorMessage?: string,
   /* eslint-enable @typescript-eslint/no-unused-vars */
 ): unknown {
-  throw new GraphQLError(
+  throw new GraphQLError(errorMessage ??
     `Too many requests, please try again in ${millisecondsToSeconds(
       response.msBeforeNext,
     )} seconds.`,
