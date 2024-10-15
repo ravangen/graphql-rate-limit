@@ -157,6 +157,42 @@ describe('rateLimitDirective', () => {
       expect(response).toMatchSnapshot();
     });
 
+    it('a specific argument on a field', async () => {
+      const { rateLimitDirectiveTypeDefs, rateLimitDirectiveTransformer } = rateLimitDirective();
+      const schema = rateLimitDirectiveTransformer(
+        makeExecutableSchema({
+          typeDefs: [
+            rateLimitDirectiveTypeDefs,
+            `type Query {
+              quote(
+                argLimited: String @rateLimit
+                argUnlimited: Int
+              ): String
+            }`,
+          ],
+          resolvers,
+          resolverValidationOptions,
+        }),
+      );
+
+      const responseUnlimited = await graphql({
+        schema,
+        source: 'query { quote(argUnlimited: 3) }',
+      });
+
+      expect(limiterConsume).not.toHaveBeenCalled();
+      expect(responseUnlimited).toMatchSnapshot();
+
+      const responseLimited = await graphql({
+        schema,
+        source: 'query { quote(argLimited: "yes") }',
+      });
+
+      expect(limiterConsume).toHaveBeenCalledTimes(1);
+      expect(limiterConsume).toHaveBeenCalledWith('Query.quote', 1);
+      expect(responseLimited).toMatchSnapshot();
+    });
+
     it('a repeated object', async () => {
       const { rateLimitDirectiveTypeDefs, rateLimitDirectiveTransformer } = rateLimitDirective();
       const schema = rateLimitDirectiveTransformer(

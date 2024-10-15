@@ -15,6 +15,22 @@ exports[`rateLimitDirective limiting a repeated object 1`] = `
 }
 `;
 
+exports[`rateLimitDirective limiting a specific argument on a field 1`] = `
+{
+  "data": {
+    "quote": "The future is something which everyone reaches at the rate of sixty minutes an hour, whatever he does, whoever he is. ― C.S. Lewis",
+  },
+}
+`;
+
+exports[`rateLimitDirective limiting a specific argument on a field 2`] = `
+{
+  "data": {
+    "quote": "The future is something which everyone reaches at the rate of sixty minutes an hour, whatever he does, whoever he is. ― C.S. Lewis",
+  },
+}
+`;
+
 exports[`rateLimitDirective limiting a specific field 1`] = `
 {
   "data": {

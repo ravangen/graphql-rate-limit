@@ -5,6 +5,8 @@ import {
   GraphQLFieldConfig,
   GraphQLResolveInfo,
   GraphQLSchema,
+  IntValueNode,
+  Kind,
 } from 'graphql';
 import { getDirective, mapSchema, MapperKind } from '@graphql-tools/utils';
 import {
@@ -280,9 +282,13 @@ export function rateLimitDirective<
     }
     return limiter;
   };
-  const rateLimit = (directive: Record<string, unknown>, field: GraphQLFieldUnion): void => {
-    const directiveArgs = directive as RateLimitArgs;
-    const limiter = getLimiter(directiveArgs);
+  const rateLimit = (
+    directiveField: Record<string, unknown> | undefined,
+    field: GraphQLFieldUnion,
+    argLimiters?: Record<string, { args: RateLimitArgs; limiter: RateLimiterAbstract }>,
+  ): void => {
+    const directiveArgsField = directiveField as RateLimitArgs | undefined;
+    const limiterField = directiveArgsField ? getLimiter(directiveArgsField) : undefined;
     const { extensions: fieldExtensions, resolve = defaultFieldResolver } = field;
     const directiveExtensions = fieldExtensions
       ? <Maybe<RateLimitExtensions<TContext>>>fieldExtensions[name]
@@ -293,29 +299,65 @@ export function rateLimitDirective<
       onLimit: fieldOnLimit = onLimit,
       setState: fieldSetState = setState,
     } = directiveExtensions ?? {};
-    field.resolve = async (source, args, context: TContext, info) => {
-      const pointsToConsume = await fieldPointsCalculator(
-        directiveArgs,
-        source,
-        args,
-        context,
-        info,
-      );
-      if (pointsToConsume !== 0) {
-        const key = await fieldKeyGenerator(directiveArgs, source, args, context, info);
-        try {
-          const response = await limiter.consume(key, pointsToConsume);
-          if (fieldSetState) fieldSetState(response, directiveArgs, source, args, context, info);
-        } catch (e) {
-          if (e instanceof Error) {
-            throw e;
-          }
 
-          const response = e as RateLimiterRes;
-          if (fieldSetState) fieldSetState(response, directiveArgs, source, args, context, info);
-          return fieldOnLimit(response, directiveArgs, source, args, context, info);
+    field.resolve = async (source, args, context: TContext, info) => {
+      if (directiveArgsField) {
+        const pointsToConsume = await fieldPointsCalculator(
+          directiveArgsField,
+          source,
+          args,
+          context,
+          info,
+        );
+        if (pointsToConsume !== 0) {
+          const key = await fieldKeyGenerator(directiveArgsField, source, args, context, info);
+          try {
+            const response = await limiterField?.consume(key, pointsToConsume);
+            if (response && fieldSetState)
+              fieldSetState(response, directiveArgsField, source, args, context, info);
+          } catch (e) {
+            if (e instanceof Error) {
+              throw e;
+            }
+
+            const response = e as RateLimiterRes;
+            if (fieldSetState)
+              fieldSetState(response, directiveArgsField, source, args, context, info);
+            return fieldOnLimit(response, directiveArgsField, source, args, context, info);
+          }
         }
       }
+
+      for (const fieldNode of info.fieldNodes) {
+        if (!fieldNode.arguments) continue;
+        for (const argNode of fieldNode.arguments) {
+          const limiterArg = argLimiters?.[argNode.name.value];
+          if (!limiterArg) continue;
+          const pointsToConsume = await fieldPointsCalculator(
+            limiterArg.args,
+            source,
+            args,
+            context,
+            info,
+          );
+          const key = await fieldKeyGenerator(limiterArg.args, source, args, context, info);
+          try {
+            const response = await limiterArg.limiter?.consume(key, pointsToConsume);
+            if (response && fieldSetState)
+              fieldSetState(response, limiterArg.args, source, args, context, info);
+          } catch (e) {
+            if (e instanceof Error) {
+              throw e;
+            }
+
+            const response = e as RateLimiterRes;
+            if (fieldSetState)
+              fieldSetState(response, limiterArg.args, source, args, context, info);
+            return fieldOnLimit(response, limiterArg.args, source, args, context, info);
+          }
+        }
+      }
+
       return resolve(source, args, context, info);
     };
   };
@@ -334,7 +376,7 @@ directive @${name}(
   Number of seconds before limit is reset.
   """
   duration: Int! = ${defaultDuration}
-) on OBJECT | FIELD_DEFINITION`,
+) on OBJECT | FIELD_DEFINITION | ARGUMENT_DEFINITION`,
     rateLimitDirectiveTransformer: (schema) =>
       mapSchema(schema, {
         [MapperKind.OBJECT_TYPE]: (type, schema) => {
@@ -352,9 +394,40 @@ directive @${name}(
           return type;
         },
         [MapperKind.OBJECT_FIELD]: (fieldConfig, fieldName, typeName, schema) => {
-          const rateLimitDirective = getDirective(schema, fieldConfig, name)?.[0];
-          if (rateLimitDirective) {
-            rateLimit(rateLimitDirective, fieldConfig);
+          const directiveField = getDirective(schema, fieldConfig, name)?.[0];
+          const argLimiters = Object.entries(fieldConfig.args ?? {}).reduce<
+            Record<string, { args: RateLimitArgs; limiter: RateLimiterAbstract }>
+          >((prev, [k, argDef]) => {
+            const directiveArg = argDef.astNode?.directives?.find(
+              (compare) => compare.name.value === name,
+            );
+            if (!directiveArg) return prev;
+
+            const limit = Number(
+              directiveArg.arguments?.find(
+                (compare): compare is { kind: any; name: any; value: IntValueNode } =>
+                  compare.name.value === 'limit' && compare.value.kind === Kind.INT,
+              )?.value.value ?? defaultLimit,
+            );
+            const duration = Number(
+              directiveArg.arguments?.find(
+                (compare): compare is { kind: any; name: any; value: IntValueNode } =>
+                  compare.name.value === 'duration' && compare.value.kind === Kind.INT,
+              )?.value.value ?? defaultDuration,
+            );
+
+            const limiter = limit && duration ? getLimiter({ limit, duration }) : undefined;
+
+            return limiter ? { ...prev, [k]: { args: { limit, duration }, limiter } } : prev;
+          }, {});
+
+          if (
+            directiveField ||
+            Object.values(fieldConfig.args ?? {}).some((argDef) =>
+              argDef.astNode?.directives?.some((directive) => directive.name.value === name),
+            )
+          ) {
+            rateLimit(directiveField, fieldConfig, argLimiters);
           }
           return fieldConfig;
         },
