@@ -1,3 +1,8 @@
+## 2.0.6 - 2024-12-03
+
+- Accept `rate-limiter-flexible` 5.x as valid peer dependencies
+- Update dependencies
+
 ## 2.0.5 - 2023-12-26
 
 - Accept `rate-limiter-flexible` 3.x and 4.x as valid peer dependencies

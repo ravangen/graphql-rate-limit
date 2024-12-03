@@ -3,7 +3,7 @@ version: 2.1
 executors:
   default:
     docker:
-      - image: cimg/node:20.10.0
+      - image: cimg/node:22.11.0
 
 orbs:
   codecov: codecov/codecov@3.3.0
