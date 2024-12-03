@@ -34,7 +34,7 @@
     "jest-junit": "16.0.0",
     "prettier": "3.2.5",
     "ts-jest": "29.1.2",
-    "typescript": "5.3.3"
+    "typescript": "5.7.2"
   },
   "homepage": "https://github.com/ravangen/graphql-rate-limit#readme",
   "author": "Rob Van Gennip <ravangen@gmail.com>",
