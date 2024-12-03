@@ -17,7 +17,7 @@ const getDirective = (schema: GraphQLSchema, name = 'rateLimit'): GraphQLDirecti
   const directive = schema.getDirectives().find((directive) => directive.name == name);
   expect(directive).toBeDefined();
   // See https://github.com/DefinitelyTyped/DefinitelyTyped/issues/41179
-  return directive!; // eslint-disable-line @typescript-eslint/no-non-null-assertion
+  return directive!;
 };
 
 const getError = (response: ExecutionResult): GraphQLError => {
@@ -357,13 +357,11 @@ describe('rateLimitDirective', () => {
         };
         const keyGenerator = jest.fn(
           (
-            /* eslint-disable @typescript-eslint/no-unused-vars */
             directiveArgs: RateLimitArgs,
             obj: unknown,
             args: { [key: string]: unknown },
             context: Context,
             info: GraphQLResolveInfo,
-            /* eslint-enable @typescript-eslint/no-unused-vars */
           ) => {
             // This could be sync, but that case is widely tested already so force this to return a Promise
             return Promise.resolve(`${context.ip}:${info.parentType}.${info.fieldName}`);
@@ -557,13 +555,11 @@ describe('rateLimitDirective', () => {
       it('uses custom keyGenerator', async () => {
         const keyGenerator = jest.fn(
           (
-            /* eslint-disable @typescript-eslint/no-unused-vars */
             directiveArgs: RateLimitArgs,
             obj: unknown,
             args: { [key: string]: unknown },
             context: TestContext,
             info: GraphQLResolveInfo,
-            /* eslint-enable @typescript-eslint/no-unused-vars */
           ) => {
             // This could be sync, but that case is widely tested already so force this to return a Promise
             return Promise.resolve(`CUSTOM:${info.parentType}.${info.fieldName}`);
