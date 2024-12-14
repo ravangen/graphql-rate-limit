@@ -23,7 +23,7 @@
   },
   "devDependencies": {
     "@eslint/js": "9.16.0",
-    "@graphql-tools/schema": "10.0.10",
+    "@graphql-tools/schema": "10.0.13",
     "@types/jest": "29.5.14",
     "@types/node": "22.10.1",
     "eslint": "9.16.0",
